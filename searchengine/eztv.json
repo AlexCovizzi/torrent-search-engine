@@ -1,0 +1,23 @@
+{
+    "eztv": {
+        "name": "EZTV",
+        "url": ["https://eztv.ag", "https://eztv.io", "https://eztv.re",  "https://eztv.yt", "https://eztv.it", "https://eztv.ch"],
+        "search": "/search/{query}",
+        "next": "",
+        "userAgent": "",
+        "list": {
+            "items": "tr.forum_header_border",
+            "item": {
+                "title":"td.forum_thread_post:nth-of-type(2) > a.epinfo",
+                "url":"td.forum_thread_post:nth-of-type(1) > a @ href",
+                "size": "td:nth-of-type(4)",
+                "time": "td:nth-of-type(5)",
+                "seeds": "td.forum_thread_post_end > font",
+                "leechers": "",
+                "magnet": "td.forum_thread_post:nth-of-type(3) > a.magnet @ href"
+            }
+        },
+        "item": {
+        }
+    }
+}
