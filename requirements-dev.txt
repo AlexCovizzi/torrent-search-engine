@@ -1,2 +1,2 @@
-pep8
-pytest
+# installs dependencies from ./setup.py, and the package itself, in editable mode
+-e .[dev]

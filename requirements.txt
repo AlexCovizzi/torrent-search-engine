@@ -1,2 +1,2 @@
-requests
-beautifulsoup4~=4.7
+# installs dependencies from ./setup.py, and the package itself, in editable mode
+-e .
