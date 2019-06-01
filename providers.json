@@ -1,0 +1,45 @@
+{
+    "eztv.yt": {
+        "name": "EZTV",
+        "url": "https://eztv.yt",
+        "search": "/search/{query}",
+        "userAgent": "",
+        "list": {
+            "items": "tr.forum_header_border",
+            "item": {
+                "title":"td.forum_thread_post:nth-of-type(2) > a.epinfo@",
+                "url":"td.forum_thread_post:nth-of-type(1) > a @ href",
+                "size": "td:nth-of-type(4)@",
+                "time": "td:nth-of-type(5)@",
+                "seeds": "td.forum_thread_post_end > font@",
+                "leechers": "",
+                "magnet": "td.forum_thread_post:nth-of-type(3) > a.magnet @ href"
+            },
+            "next": ""
+        },
+        "item": {
+        }
+    },
+    "1337x.am": {
+        "name": "1337x",
+        "url": "https://www.1337x.am/",
+        "search": "/search/{query}/1/",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.157 Safari/537.36",
+        "list": {
+            "items": "table.table-list > tbody > tr",
+            "item": {
+                "title":"td.name > a:nth-of-type(2)@",
+                "url":"td.name > a:nth-of-type(2) @ href",
+                "size": "td.size@",
+                "time": "td:nth-of-type(5)@",
+                "seeds": "td.seeds@",
+                "leechers": "",
+                "magnet": ""
+            },
+            "next": ""
+        },
+        "item": {
+            "magnet": "ul.download-links-dontblock > li > a @ href"
+        }
+    }
+}
