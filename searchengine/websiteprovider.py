@@ -2,7 +2,7 @@ from typing import Any, List
 import requests
 from searchengine.exceptions import ProviderSearchError
 from searchengine.provider import TorrentProvider
-from searchengine.scraper.scraper import Scraper
+from searchengine.scraper import Scraper
 from searchengine.scraper.selector import Selector, NullSelector
 from searchengine.torrent import Torrent
 

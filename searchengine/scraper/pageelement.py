@@ -9,7 +9,7 @@ class PageElement:
     def __init__(self, parser: Optional[Tag] = None):
         self.parser = parser
 
-    def select(self, selector: Union[Selector, str] = '', limit: int = 0) -> List["PageElement"]:
+    def select(self, selector: Union[Selector, str] = "", limit: int = 0) -> List["PageElement"]:
         if not self.parser or not selector:
             return []
 

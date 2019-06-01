@@ -8,7 +8,7 @@ def test_urljoin_returns_empty_string_if_there_are_no_arguments():
     assert actual == expected
 
 
-def test_urljoin_returns_string_with_trailing_slash_if_the_last_path_passed_as_argument_has_a_trailing_slash():
+def test_urljoin_returns_string_ending_with_slash_if_last_arg_ends_with_slash():
     base_url = "http://alexcovizzi.com/"
     path1 = "/projects/"
     path2 = "this/"

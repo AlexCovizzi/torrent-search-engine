@@ -1,12 +1,16 @@
+from typing import Iterable
 from urllib import parse
 from re import match
 
 
-def urljoin(*urls: str) -> str:
+def urljoin(*urls: Iterable[str]) -> str:
     if len(urls) == 0:
         return ""
+
     has_trailing_slash = True if urls[-1].endswith('/') else False
-    return '/'.join([url.strip('/') for url in urls]) + ('/' if has_trailing_slash else '')
+    joined = '/'.join([url.strip('/') for url in urls])
+    joined = joined + ('/' if has_trailing_slash else '')
+    return joined
 
 
 def urlfix(s: str, scheme: str = 'https') -> str:

@@ -13,6 +13,9 @@ class Selector:
 
     @staticmethod
     def parse(selector: str):
+        """
+        Selector format is: <css selector>@<attribute> | re:<formatter>
+        """
         parts = selector.split('|')
         parts = [part.strip() for part in parts]
 
