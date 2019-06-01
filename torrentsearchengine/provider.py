@@ -1,8 +1,8 @@
 from typing import List
 from abc import ABC, abstractmethod
 import requests
-from searchengine.utils import urljoin, urlfix
-from searchengine.torrent import Torrent
+from torrentsearchengine.utils import urljoin, urlfix
+from torrentsearchengine.torrent import Torrent
 
 
 class TorrentProvider(ABC):

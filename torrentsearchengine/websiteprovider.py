@@ -1,10 +1,10 @@
 from typing import Any, List
 import requests
-from searchengine.exceptions import ProviderSearchError
-from searchengine.provider import TorrentProvider
-from searchengine.scraper import Scraper
-from searchengine.scraper.selector import Selector, NullSelector
-from searchengine.torrent import Torrent
+from torrentsearchengine.exceptions import ProviderSearchError
+from torrentsearchengine.provider import TorrentProvider
+from torrentsearchengine.scraper import Scraper
+from torrentsearchengine.scraper.selector import Selector, NullSelector
+from torrentsearchengine.torrent import Torrent
 
 
 class WebsiteTorrentProvider(TorrentProvider):

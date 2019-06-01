@@ -1,5 +1,5 @@
 from bs4 import BeautifulSoup
-from searchengine.scraper.pageelement import PageElement, NullPageElement
+from torrentsearchengine.scraper.pageelement import PageElement, NullPageElement
 
 
 class Scraper(PageElement):

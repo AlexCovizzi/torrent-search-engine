@@ -1,7 +1,7 @@
 from typing import Union, Any, Optional, List
 from bs4 import BeautifulSoup, Tag
-from searchengine.scraper.selector import Selector
-from searchengine.scraper.attribute import Attribute, NullAttribute
+from torrentsearchengine.scraper.selector import Selector
+from torrentsearchengine.scraper.attribute import Attribute, NullAttribute
 
 
 class PageElement:

@@ -1,4 +1,4 @@
-from searchengine.utils import KwArgs
+from torrentsearchengine.utils import KwArgs
 
 
 class Torrent:

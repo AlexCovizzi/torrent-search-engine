@@ -1,9 +1,9 @@
 from typing import List, Union, Optional
 from concurrent.futures import ThreadPoolExecutor
-from searchengine.exceptions import ProviderSearchError
-from searchengine.torrent import Torrent
-from searchengine.provider import TorrentProvider
-from searchengine.websiteprovider import WebsiteTorrentProvider
+from torrentsearchengine.exceptions import ProviderSearchError
+from torrentsearchengine.torrent import Torrent
+from torrentsearchengine.provider import TorrentProvider
+from torrentsearchengine.websiteprovider import WebsiteTorrentProvider
 
 
 SEARCH_LIMIT_DEFAULT = 25
