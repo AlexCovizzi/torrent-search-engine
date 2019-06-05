@@ -6,26 +6,27 @@ class Torrent:
     def __init__(self, **kwargs: dict):
         kwargs = KwArgs(kwargs)
 
-        self.provider_id = kwargs.getstr('provider_id')
-        self.provider = kwargs.getstr('provider')
+        self.provider = kwargs.get('provider')
         self.title = kwargs.getstr('title')
         self.url = kwargs.getstr('url')
         self.size = kwargs.getstr('size')
         self.time = kwargs.getstr('time')
         self.seeds = kwargs.getint('seeds', -1)
         self.leechers = kwargs.getint('leechers', -1)
-        self.magnet = kwargs.getstr('magnet')
+
+        self._magnet = kwargs.getstr('magnet')
+
+        self.id = self.provider.id + ";" + self.title
 
     def to_dict(self):
         return {
-            "provider_id": self.provider_id,
+            "id": self.id,
             "provider": self.provider,
             "title": self.title,
             "url": self.url,
             "size": self.size,
             "seeds": self.seeds,
-            "leechers": self.leechers,
-            "magnet": self.magnet
+            "leechers": self.leechers
         }
 
     def __str__(self):

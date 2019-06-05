@@ -6,6 +6,9 @@ class KwArgs:
     def __init__(self, kwargs: dict):
         self.kwargs = kwargs
 
+    def items(self):
+        return self.kwargs.items()
+
     def get(self, key: Union[str, int, Tuple], default: Any = None):
         value = self.kwargs.get(key, default)
         return value
@@ -22,4 +25,11 @@ class KwArgs:
         try:
             return int(value)
         except Exception:
+            return default
+
+    def getdict(self, key: Union[str, int, Tuple], default: dict = {}):
+        value = self.get(key, default)
+        if isinstance(value, dict):
+            return value
+        else:
             return default

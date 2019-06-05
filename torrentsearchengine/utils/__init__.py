@@ -1,2 +1,3 @@
-from searchengine.utils.kwargs import *
-from searchengine.utils.urlutils import *
+from torrentsearchengine.utils.kwargs import *
+from torrentsearchengine.utils.urlutils import *
+from torrentsearchengine.utils.jsonvalidator import *

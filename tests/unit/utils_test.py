@@ -1,5 +1,5 @@
 import pytest
-from searchengine.utils import *
+from torrentsearchengine.utils import *
 
 
 def test_urljoin_returns_empty_string_if_there_are_no_arguments():

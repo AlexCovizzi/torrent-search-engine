@@ -1,6 +1,6 @@
 from typing import List, Union, Optional
 from concurrent.futures import ThreadPoolExecutor
-from torrentsearchengine.exceptions import ProviderSearchError
+from torrentsearchengine.exceptions import SearchError
 from torrentsearchengine.torrent import Torrent
 from torrentsearchengine.provider import TorrentProvider
 from torrentsearchengine.websiteprovider import WebsiteTorrentProvider
@@ -25,7 +25,7 @@ class TorrentSearchEngine:
 
 
     def fetch_magnet(self, torrent: Torrent):
-        provider = self.get_provider(torrent.provider_id)
+        provider = self.get_provider(torrent.provider.id)
         if provider:
             return provider.get_magnet(torrent)
         else:
@@ -64,7 +64,7 @@ class TorrentSearchEngine:
         try:
             torrents = provider.search_torrents(query, limit)
             return torrents
-        except ProviderSearchError as e:
+        except SearchError as e:
             return e
 
 

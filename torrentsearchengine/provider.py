@@ -29,6 +29,9 @@ class TorrentProvider(ABC):
 
     @abstractmethod
     def fetch_magnet(self, torrent: Torrent) -> str:
+        """
+        Fetch the magnet for this torrent.
+        """
         pass
 
     def fetch(self, path: str) -> requests.Response:

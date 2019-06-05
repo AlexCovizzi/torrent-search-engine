@@ -10,6 +10,7 @@ pep8 = "*"
 [packages]
 requests = "*"
 beautifulsoup4 = "~=4.7"
+jsonschema = "~=3.0"
 
 [requires]
 python_version = "3.5"

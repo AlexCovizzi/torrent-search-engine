@@ -24,7 +24,7 @@ class PageElement:
 
         return elements
 
-    def select_one(self, selector: Union[Selector, str] = '') -> "PageElement":
+    def select_one(self, selector: Union[Selector, str]="") -> "PageElement":
         if not self.parser or not selector:
             return NullPageElement()
 
