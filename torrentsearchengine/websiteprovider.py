@@ -14,7 +14,7 @@ class WebsiteTorrentProvider(TorrentProvider):
         kwargs = KwArgs(kwargs)
 
         name = kwargs.getstr('name', pid)
-        url = kwargs.getstr('url', '')
+        url = kwargs.getstr('url')
         user_agent = kwargs.getstr('userAgent')
 
         list_section = KwArgs(kwargs.getdict('list'))
@@ -61,7 +61,7 @@ class WebsiteTorrentProvider(TorrentProvider):
 
             torrent = Torrent(**props)
             torrents.append(torrent)
-        
+
         return torrents
 
     def fetch_magnet(self, torrent: Torrent) -> str:
@@ -73,18 +73,24 @@ class WebsiteTorrentProvider(TorrentProvider):
         if not path:
             return ''
 
-        # retrieve the magnet selector for the single item
-        selector = self.item_selectors.get('magnet', NullSelector())
+        # retrieve the magnet selector
+        selector = self.item_selectors.get('magnet')
+        if not selector:
+            return ''
 
-        # create the scraper and fetch the torrent info page
-        response = self.fetch(path)
+        # fetch the torrent info page and scrape
+        try:
+            response = self.fetch(path)
+        except Exception:
+            return ''
+
         scraper = Scraper(response.text)
 
         magnet = scraper.select_one(selector.css) \
                         .attr(selector.attr) \
                         .re(selector.re)
 
-        # cache the magnet
+        # save the magnet in the torrent
         torrent._magnet = magnet
 
         return magnet

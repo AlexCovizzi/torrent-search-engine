@@ -31,6 +31,13 @@ class TorrentProvider(ABC):
     def fetch_magnet(self, torrent: Torrent) -> str:
         """
         Fetch the magnet for this torrent.
+
+        Parameters:
+            torrent: Torrent - The torrent of which to fetch the magnet uri.
+
+        Returns:
+            str - The torrent magnet uri or an empty
+                  string if the magnet is not found.
         """
         pass
 
