@@ -4,38 +4,41 @@ from torrentsearchengine.scraper.selector import Selector
 from torrentsearchengine.scraper.attribute import Attribute, NullAttribute
 
 
-class PageElement:
+class Element:
 
     def __init__(self, parser: Optional[Tag] = None):
         self.parser = parser
 
-    def select(self, selector: Union[Selector, str] = "", limit: int = 0) -> List["PageElement"]:
+    def select(self, selector: Union[Selector, str]="",
+               limit: int = 0) -> List["Element"]:
         if not self.parser or not selector:
             return []
 
-        selector = selector if isinstance(selector, Selector) else Selector.parse(selector)
+        if isinstance(selector, str):
+            selector = Selector.parse(selector)
 
         try:
             tags = self.parser.select(selector.css, limit=limit)
         except ValueError:
             tags = []
 
-        elements = [PageElement(tag) for tag in tags]
+        elements = [Element(tag) for tag in tags]
 
         return elements
 
-    def select_one(self, selector: Union[Selector, str]="") -> "PageElement":
+    def select_one(self, selector: Union[Selector, str]="") -> "Element":
         if not self.parser or not selector:
-            return NullPageElement()
+            return NullElement()
 
-        selector = selector if isinstance(selector, Selector) else Selector.parse(selector)
+        if isinstance(selector, str):
+            selector = Selector.parse(selector)
 
         try:
             tag = self.parser.select_one(selector.css)
         except ValueError:
             tag = None
 
-        element = PageElement(tag) if tag else NullPageElement()
+        element = Element(tag) if tag else NullElement()
 
         return element
 
@@ -52,7 +55,7 @@ class PageElement:
         return str(self.parser)
 
 
-class NullPageElement(PageElement):
+class NullElement(Element):
 
     def __init__(self):
-        super(NullPageElement, self).__init__(None)
+        super(NullElement, self).__init__(None)

@@ -7,6 +7,9 @@ class Attribute:
     def __init__(self, value: Any):
         self.value = value
 
+    def get(self) -> Any:
+        return self.value
+
     def re(self, regex: str) -> str:
         if not regex:
             return self.to_string()
@@ -19,14 +22,13 @@ class Attribute:
 
         return value
 
-    def get(self) -> Any:
-        return self.value
-
-    def to_string(self) -> str:
+    def to_string(self, default: str = "") -> str:
         if self.value is None:
-            return ''
-
-        return str(self.value)
+            return default
+        try:
+            return str(self.value)
+        except Exception:
+            return default
 
     def to_int(self, default: int = 0) -> int:
         try:

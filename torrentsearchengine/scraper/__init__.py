@@ -1,13 +1,13 @@
 from bs4 import BeautifulSoup
-from torrentsearchengine.scraper.pageelement import PageElement, NullPageElement
+from torrentsearchengine.scraper.element import Element, NullElement
 
 
-class Scraper(PageElement):
+class Scraper(Element):
 
     def __init__(self, markup: str = ''):
         try:
             parser = BeautifulSoup(markup, 'html.parser')
         except ValueError:
-            parser = NullPageElement()
+            parser = NullElement()
 
         super(Scraper, self).__init__(parser)

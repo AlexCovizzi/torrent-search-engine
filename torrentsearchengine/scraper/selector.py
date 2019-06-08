@@ -9,10 +9,11 @@ class Selector:
         self.re = re
 
     def __str__(self):
-        return "(css: {css}, attr: {attr}, re: {re})".format(css=self.css, attr=self.attr, re=self.re)
+        return "(css: {css}, attr: {attr}, re: {re})" \
+                .format(css=self.css, attr=self.attr, re=self.re)
 
     @staticmethod
-    def parse(selector: str):
+    def parse(selector: str) -> "Selector":
         """
         Selector format is: <css selector>@<attribute> | re:<formatter>
         """
@@ -28,7 +29,8 @@ class Selector:
         attr = attr_selector_parts[1] if len(attr_selector_parts) > 1 else None
 
         regex = None
-        re_part = parts[1] if len(parts) > 1 and parts[1].startswith('re:') else None
+        re_part = parts[1] if len(parts) > 1 and \
+            parts[1].startswith('re:') else None
         if re_part:
             m = match(r"re:\s*(.*)\s*", re_part)
             if m:
