@@ -49,4 +49,16 @@ class TorrentProvider(ABC):
         url = urljoin(self.url, path)
         url = urlfix(url)
 
-        return requests.get(url, headers=headers)
+        try:
+            response = requests.get(url, headers=headers)
+        except requests.exceptions.HTTPError as e:
+            url = e.request.url if e.request is not None else "the page"
+            reason = "An error occurred while fetching {}.".format(url)
+            raise TorrentProviderSearchError(self, query, reason) from e
+
+        if response.status_code not in range(200, 300):
+            reason = "{} responded with code: {}" \
+                     .format(response.url, str(response.status_code))
+            raise TorrentProviderSearchError(self, query, reason)
+
+        return response

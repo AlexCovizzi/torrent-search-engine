@@ -1,7 +1,7 @@
 from typing import Any, List
 import requests
 from torrentsearchengine.utils import KwArgs
-from torrentsearchengine.exceptions import SearchError
+from torrentsearchengine.exceptions import TorrentProviderSearchError
 from torrentsearchengine.provider import TorrentProvider
 from torrentsearchengine.scraper import Scraper
 from torrentsearchengine.scraper.selector import Selector, NullSelector
@@ -38,15 +38,8 @@ class WebsiteTorrentProvider(TorrentProvider):
         torrents = []
 
         # fetch the search page
-        try:
-            path = self.search_path.format(query=query)
-            response = self.fetch(path)
-        except requests.exceptions.HTTPError as e:
-            raise SearchError(e.request, e.strerror)
-
-        if response.status_code not in range(200, 300):
-            raise SearchError(response.request, "responded with status code " +
-                              str(response.status_code))
+        path = self.search_path.format(query=query)
+        response = self.fetch(path)
 
         scraper = Scraper(response.text)
 
@@ -79,10 +72,7 @@ class WebsiteTorrentProvider(TorrentProvider):
             return ''
 
         # fetch the torrent info page and scrape
-        try:
-            response = self.fetch(path)
-        except Exception:
-            return ''
+        response = self.fetch(path)
 
         scraper = Scraper(response.text)
 

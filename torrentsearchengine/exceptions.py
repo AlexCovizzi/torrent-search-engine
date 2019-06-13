@@ -1,15 +1,22 @@
 import requests
+from torrentsearchengine import TorrentProvider
 
 
 class TorrentSearchEngineError(Exception):
 
-    def __init__(self, message: str):
-        self.request = request
-        self.message = "Failed to retrieve {}: {}".format(request.url, message)
+    def __init__(self, message: str = ""):
+        super().__init__(message)
 
 
-class SearchError(TorrentSearchEngineError):
+class TorrentProviderError(Exception):
 
-    def __init__(self, request: requests.Request, message: str):
-        self.request = request
-        self.message = "Failed to retrieve {}: {}".format(request.url, message)
+    def __init__(self, provider: TorrentProvider, message: str = ""):
+        self.provider = provider
+
+
+class TorrentProviderSearchError(TorrentProviderError):
+
+    def __init__(self, provider: TorrentProvider, query: str, reason: str = ""):
+        message = "Search failed (provider: {}, query: {}): {}" \
+                  .format(provider.name, query, reason)
+        super().__init__(provider, message)
