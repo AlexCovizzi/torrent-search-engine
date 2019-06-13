@@ -21,7 +21,7 @@ def test_parse_returns_selector_with_no_attr():
 def test_parse_returns_selector_with_no_re():
     s = "parent > .child:focus@ text| no: \\w+"
     selector = Selector.parse(s)
-    assert selector.css == "parent > child:focus"
+    assert selector.css == "parent > .child:focus"
     assert selector.attr == "text"
     assert selector.re is None
 
