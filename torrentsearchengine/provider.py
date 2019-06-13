@@ -2,6 +2,7 @@ from typing import List
 from abc import ABC, abstractmethod
 import requests
 from torrentsearchengine.utils import urljoin, urlfix
+from torrentsearchengine.exceptions import TorrentProviderRequestError
 from torrentsearchengine.torrent import Torrent
 
 
@@ -51,14 +52,15 @@ class TorrentProvider(ABC):
 
         try:
             response = requests.get(url, headers=headers)
-        except requests.exceptions.HTTPError as e:
-            url = e.request.url if e.request is not None else "the page"
-            reason = "An error occurred while fetching {}.".format(url)
-            raise TorrentProviderSearchError(self, query, reason) from e
-
-        if response.status_code not in range(200, 300):
-            reason = "{} responded with code: {}" \
-                     .format(response.url, str(response.status_code))
-            raise TorrentProviderSearchError(self, query, reason)
+            response.raise_for_status()
+        except requests.exceptions.ConnectionError as e:
+            message = "Failed to connect to {}.".format(url)
+            raise TorrentProviderRequestError(self, message, e.request) from e
+        except requests.exceptions.RequestException as e:
+            message = "An error occurred while fetching {}.".format(url)
+            raise TorrentProviderRequestError(self, message, e.request) from e
 
         return response
+
+    def __str__(self):
+        return self.name

@@ -1,7 +1,7 @@
 {
     "eztv.yt": {
         "name": "EZTV",
-        "url": "https://eztv.yt",
+        "url": "https://eztv.ytt",
         "search": "/search/{query}",
         "userAgent": "",
         "list": {

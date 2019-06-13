@@ -2,7 +2,7 @@ from typing import List, Union, Optional
 import json
 from concurrent.futures import ThreadPoolExecutor
 from torrentsearchengine.providermanager import TorrentProviderManager
-from torrentsearchengine.exceptions import TorrentProviderSearchError
+from torrentsearchengine.exceptions import TorrentProviderError
 from torrentsearchengine.torrent import Torrent
 from torrentsearchengine.provider import TorrentProvider
 
@@ -45,6 +45,6 @@ class TorrentSearchEngine:
         torrents = []
         try:
             torrents = provider.search(query, limit)
-        except TorrentProviderSearchError as e:
+        except TorrentProviderError as e:
             self.errors.append(e)
         return torrents

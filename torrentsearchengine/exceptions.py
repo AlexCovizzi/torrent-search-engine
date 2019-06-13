@@ -1,5 +1,4 @@
 import requests
-from torrentsearchengine import TorrentProvider
 
 
 class TorrentSearchEngineError(Exception):
@@ -10,13 +9,21 @@ class TorrentSearchEngineError(Exception):
 
 class TorrentProviderError(Exception):
 
-    def __init__(self, provider: TorrentProvider, message: str = ""):
+    def __init__(self, provider, message: str = ""):
         self.provider = provider
 
 
-class TorrentProviderSearchError(TorrentProviderError):
+class TorrentProviderRequestError(TorrentProviderError):
 
-    def __init__(self, provider: TorrentProvider, query: str, reason: str = ""):
+    def __init__(self, provider, request: requests.Request, message: str = ""):
+        self.provider = provider
+        self.request = request
+
+
+class TorrentProviderSearchError(TorrentProviderRequestError):
+
+    def __init__(self, provider, query: str, request: requests.Request,
+                 reason: str = ""):
         message = "Search failed (provider: {}, query: {}): {}" \
-                  .format(provider.name, query, reason)
-        super().__init__(provider, message)
+                  .format(str(provider), query, reason)
+        super().__init__(provider, request, message)

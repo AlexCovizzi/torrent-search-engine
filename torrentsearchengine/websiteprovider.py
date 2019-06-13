@@ -1,7 +1,7 @@
 from typing import Any, List
 import requests
 from torrentsearchengine.utils import KwArgs
-from torrentsearchengine.exceptions import TorrentProviderSearchError
+from torrentsearchengine.exceptions import *
 from torrentsearchengine.provider import TorrentProvider
 from torrentsearchengine.scraper import Scraper
 from torrentsearchengine.scraper.selector import Selector, NullSelector
@@ -39,7 +39,11 @@ class WebsiteTorrentProvider(TorrentProvider):
 
         # fetch the search page
         path = self.search_path.format(query=query)
-        response = self.fetch(path)
+
+        try:
+            response = self.fetch(path)
+        except TorrentProviderRequestError as e:
+            raise TorrentProviderSearchError(self, query, e.request) from e
 
         scraper = Scraper(response.text)
 
@@ -84,17 +88,3 @@ class WebsiteTorrentProvider(TorrentProvider):
         torrent._magnet = magnet
 
         return magnet
-
-
-if __name__ == '__main__':
-    import json
-
-    path = 'providers.json'
-    with open(path, 'r', encoding='utf-8') as f:
-        provider_dict = json.load(f).get('eztv', {})
-
-    provider = ScrapeTorrentProvider('eztv', **provider_dict)
-
-    results = provider.search_torrents('game of thrones', 5)
-    for result in results:
-        print(str(result))
