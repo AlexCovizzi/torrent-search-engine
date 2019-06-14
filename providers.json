@@ -1,45 +1,64 @@
 {
     "eztv.yt": {
         "name": "EZTV",
-        "url": "https://eztv.ytt",
+        "url": "https://eztv.yt",
         "search": "/search/{query}",
-        "userAgent": "",
         "list": {
             "items": "tr.forum_header_border",
             "item": {
-                "title":"td.forum_thread_post:nth-of-type(2) > a.epinfo@",
+                "title":"td.forum_thread_post:nth-of-type(2) > a.epinfo @ text",
                 "url":"td.forum_thread_post:nth-of-type(1) > a @ href",
-                "size": "td:nth-of-type(4)@",
-                "time": "td:nth-of-type(5)@",
-                "seeds": "td.forum_thread_post_end > font@",
+                "size": "td:nth-of-type(4) @ text",
+                "time": "td:nth-of-type(5) @ text",
+                "seeds": "td.forum_thread_post_end > font @ text",
                 "leechers": "",
                 "magnet": "td.forum_thread_post:nth-of-type(3) > a.magnet @ href"
-            },
-            "next": ""
-        },
-        "item": {
+            }
         }
     },
     "1337x.am": {
         "name": "1337x",
-        "url": "https://www.1337x.am/",
+        "url": "https://www.1337x.am",
         "search": "/search/{query}/1/",
-        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.157 Safari/537.36",
+        "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.157 Safari/537.36"
+        },
         "list": {
             "items": "table.table-list > tbody > tr",
             "item": {
-                "title":"td.name > a:nth-of-type(2)@",
+                "title":"td.name > a:nth-of-type(2) @ text",
                 "url":"td.name > a:nth-of-type(2) @ href",
-                "size": "td.size@",
-                "time": "td:nth-of-type(5)@",
-                "seeds": "td.seeds@",
-                "leechers": "",
+                "size": "td.size @ text | re: [0-9\\.]+\\s+[A-Z]+",
+                "time": "td:nth-of-type(5) @ text",
+                "seeds": "td.seeds @ text",
+                "leechers": "td.leeches @ text",
                 "magnet": ""
             },
-            "next": ""
+            "next": ".pagination > ul > li.active + li > a @ href"
         },
         "item": {
             "magnet": "ul.download-links-dontblock > li > a @ href"
+        }
+    },
+    "magnetdl.com": {
+        "name": "magnetdl",
+        "url": "https://www.magnetdl.com",
+        "search": "/{query[0]}/{query}/",
+        "headers": {
+            "Accept": "*/*;"
+        },
+        "list": {
+            "items": "table.download > tbody > tr:has(> td.n)",
+            "item": {
+                "title":"td.n > a @ text",
+                "url":"td.n > a @ href",
+                "size": "td:nth-of-type(6) @ text",
+                "time": "td:nth-of-type(3) @ text",
+                "seeds": "td.s @ text",
+                "leechers": "td.l @ text",
+                "magnet": "td.m > a @ href"
+            },
+            "next": "#pages > a:nth-last-of-type(1) @ href"
         }
     }
 }

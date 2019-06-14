@@ -15,7 +15,7 @@ class WebsiteTorrentProvider(TorrentProvider):
 
         name = kwargs.getstr('name', pid)
         url = kwargs.getstr('url')
-        user_agent = kwargs.getstr('userAgent')
+        headers = kwargs.getdict('headers')
 
         list_section = KwArgs(kwargs.getdict('list'))
         list_item_section = KwArgs(list_section.getdict('item'))
@@ -32,32 +32,38 @@ class WebsiteTorrentProvider(TorrentProvider):
         self.item_selectors = {key: Selector.parse(str(s))
                                for key, s in item_section.items()}
 
-        super(WebsiteTorrentProvider, self).__init__(pid, name, url, user_agent)
+        super(WebsiteTorrentProvider, self).__init__(pid, name, url, headers)
 
     def search(self, query: str, limit: int = 0) -> List[Torrent]:
         torrents = []
 
-        # fetch the search page
         path = self.search_path.format(query=query)
 
-        try:
-            response = self.fetch(path)
-        except TorrentProviderRequestError as e:
-            raise TorrentProviderSearchError(self, query, e.request) from e
+        while path and limit > 0:
+            try:
+                response = self.fetch(path)
+            except TorrentProviderRequestError as e:
+                raise TorrentProviderSearchError(self, query, e.request) from e
 
-        scraper = Scraper(response.text)
+            scraper = Scraper(response.text)
 
-        items = scraper.select(self.items_selector, limit=limit)
-        for item in items:
-            props = {"provider": self}
-            for key, selector in self.list_item_selectors.items():
-                prop = item.select_one(selector.css) \
-                           .attr(selector.attr) \
-                           .re(selector.re)
-                props[key] = prop
+            items = scraper.select(self.items_selector, limit=limit)
+            for item in items:
+                props = {"provider": self}
+                for key, selector in self.list_item_selectors.items():
+                    prop = item.select_one(selector.css) \
+                               .attr(selector.attr) \
+                               .re(selector.re)
+                    props[key] = prop
 
-            torrent = Torrent(**props)
-            torrents.append(torrent)
+                torrent = Torrent(**props)
+                torrents.append(torrent)
+
+            limit -= len(items)
+
+            path = scraper.select_one(self.next_page_url_selector.css) \
+                          .attr(self.next_page_url_selector.attr) \
+                          .re(self.next_page_url_selector.re)
 
         return torrents
 

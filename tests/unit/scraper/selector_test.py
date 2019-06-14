@@ -3,11 +3,11 @@ from torrentsearchengine.scraper.selector import *
 
 
 def test_parse_returns_the_correct_selector():
-    s = "parent > child:focus@ text| re: \\w+"
+    s = "parent > child:focus@ text| re: [A-Z]+"
     selector = Selector.parse(s)
     assert selector.css == "parent > child:focus"
     assert selector.attr == "text"
-    assert selector.re == "\\w+"
+    assert selector.re == "[A-Z]+"
 
 
 def test_parse_returns_selector_with_no_attr():

@@ -8,11 +8,11 @@ from torrentsearchengine.torrent import Torrent
 
 class TorrentProvider(ABC):
 
-    def __init__(self, pid: str, name: str, url: str, user_agent: str = None):
+    def __init__(self, pid: str, name: str, url: str, headers: dict = None):
         self.id = pid
         self.name = name
         self.url = url
-        self.user_agent = user_agent
+        self.headers = headers
 
     @abstractmethod
     def search(self, query: str, limit: int = 25) -> List[Torrent]:
@@ -43,15 +43,11 @@ class TorrentProvider(ABC):
         pass
 
     def fetch(self, path: str) -> requests.Response:
-        headers = {}
-        if self.user_agent:
-            headers['User-Agent'] = self.user_agent
-
         url = urljoin(self.url, path)
         url = urlfix(url)
 
         try:
-            response = requests.get(url, headers=headers)
+            response = requests.get(url, headers=self.headers)
             response.raise_for_status()
         except requests.exceptions.ConnectionError as e:
             message = "Failed to connect to {}.".format(url)

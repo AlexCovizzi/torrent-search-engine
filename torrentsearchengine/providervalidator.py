@@ -22,9 +22,14 @@ TORRENT_PROVIDER_SCHEMA = {
                 "search": {
                     "type": "string"
                 },
-                "userAgent": {
-                    "type": "string",
-                    "default": ""
+                "headers": {
+                    "type": "object",
+                    "default": {},
+                    "patternProperties": {
+                        "[\\w\\-]+": {
+                            "type": "string"
+                        }
+                    }
                 },
                 "list": {
                     "type": "object",
