@@ -31,8 +31,7 @@
                 "size": "td.size @ text | re: [0-9\\.]+\\s+[A-Z]+",
                 "time": "td:nth-of-type(5) @ text",
                 "seeds": "td.seeds @ text",
-                "leechers": "td.leeches @ text",
-                "magnet": ""
+                "leechers": "td.leeches @ text"
             },
             "next": ".pagination > ul > li.active + li > a @ href"
         },
@@ -59,7 +58,7 @@
                 "leechers": "td.l @ text",
                 "magnet": "td.m > a @ href"
             },
-            "next": "#pages > a:nth-last-of-type(1) @ href"
+            "next": "#pages > a:contains(Next) @ href"
         }
     }
 }

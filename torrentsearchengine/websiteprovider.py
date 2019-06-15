@@ -38,14 +38,16 @@ class WebsiteTorrentProvider(TorrentProvider):
 
     def search(self, query: str, limit: int = 0) -> List[Torrent]:
         torrents = []
+        remaining = limit
 
+        # format query for url
         query = query.strip()
         if self.whitespace_char:
             query = re.sub(r"\s+", self.whitespace_char, query)
 
         path = self.search_path.format(query=query)
 
-        while path and limit > 0:
+        while path and (limit == 0 or remaining > 0):
             try:
                 response = self.fetch(path)
             except TorrentProviderRequestError as e:
@@ -53,7 +55,7 @@ class WebsiteTorrentProvider(TorrentProvider):
 
             scraper = Scraper(response.text)
 
-            items = scraper.select(self.items_selector, limit=limit)
+            items = scraper.select(self.items_selector, limit=remaining)
             for item in items:
                 props = {"provider": self}
                 for key, selector in self.list_item_selectors.items():
@@ -65,7 +67,7 @@ class WebsiteTorrentProvider(TorrentProvider):
                 torrent = Torrent(**props)
                 torrents.append(torrent)
 
-            limit -= len(items)
+            remaining -= len(items)
 
             path = scraper.select_one(self.next_page_url_selector.css) \
                           .attr(self.next_page_url_selector.attr) \
