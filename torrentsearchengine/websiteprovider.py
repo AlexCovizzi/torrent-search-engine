@@ -1,4 +1,5 @@
 from typing import Any, List
+import re
 import requests
 from torrentsearchengine.utils import KwArgs
 from torrentsearchengine.exceptions import *
@@ -25,6 +26,7 @@ class WebsiteTorrentProvider(TorrentProvider):
         items_selector_str = list_section.getstr('items')
 
         self.search_path = kwargs.getstr('search')
+        self.whitespace_char = kwargs.getstr('whitespace')
         self.next_page_url_selector = Selector.parse(next_page_url_selector_str)
         self.items_selector = Selector.parse(items_selector_str)
         self.list_item_selectors = {key: Selector.parse(str(s))
@@ -36,6 +38,10 @@ class WebsiteTorrentProvider(TorrentProvider):
 
     def search(self, query: str, limit: int = 0) -> List[Torrent]:
         torrents = []
+
+        query = query.strip()
+        if self.whitespace_char:
+            query = re.sub(r"\s+", self.whitespace_char, query)
 
         path = self.search_path.format(query=query)
 

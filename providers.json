@@ -44,6 +44,7 @@
         "name": "magnetdl",
         "url": "https://www.magnetdl.com",
         "search": "/{query[0]}/{query}/",
+        "whitespace": "-",
         "headers": {
             "Accept": "*/*;"
         },

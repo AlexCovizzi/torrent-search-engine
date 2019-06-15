@@ -22,6 +22,9 @@ TORRENT_PROVIDER_SCHEMA = {
                 "search": {
                     "type": "string"
                 },
+                "whitespace": {
+                    "type": "string"
+                },
                 "headers": {
                     "type": "object",
                     "default": {},
