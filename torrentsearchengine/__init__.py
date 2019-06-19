@@ -1,10 +1,12 @@
 from typing import List, Union, Optional
 import json
+import jsonschema
 import logging
+import os
 from concurrent.futures import ThreadPoolExecutor
 from threading import current_thread
+from torrentsearchengine.exceptions import *
 from torrentsearchengine.providermanager import TorrentProviderManager
-from torrentsearchengine.exceptions import TorrentProviderError
 from torrentsearchengine.torrent import Torrent
 from torrentsearchengine.provider import TorrentProvider
 
@@ -19,55 +21,100 @@ class TorrentSearchEngine:
         self.errors = []
 
     def search(self, query: str, limit: int = 0) -> List[Torrent]:
+        # reset errors, we dont care about past errors
         self.errors = []
 
-        providers = self.get_enabled_providers()
+        # an empty query simply returns no torrent (for now?)
+        if not query:
+            return []
+
+        providers = self.get_providers(enabled=True)
         n_providers = len(providers)
-        n_workers = n_providers if n_providers < 10 else None
+        if n_providers == 0:
+            return []
 
-        logger.debug("Searching on {} providers ({} threads): '{}' (max {})"
-                     .format(len(self.get_enabled_providers()), n_workers,
-                             query, limit))
+        max_workers = (os.cpu_count() or 1) * 5
+        n_workers = n_providers if n_providers < max_workers else max_workers
 
-        executor = ThreadPoolExecutor(n_workers)
+        logger.debug("Searching on {} providers ({} threads): '{}' (Max {})"
+                     .format(n_providers, n_workers, query, limit))
 
-        args = [providers, [query]*n_providers, [limit]*n_providers]
+        torrents = self._multithreaded_search(providers, query,
+                                              limit, n_workers)
 
-        results = executor.map(self._search, *args)
+        torrents = self._filter(torrents)
+        torrents = self._sort(torrents)
+        torrents = torrents[:limit] if limit > 0 else torrents
 
-        return [item for sublist in results for item in sublist]
+        return torrents
 
-    def get_providers(self):
-        return self.provider_manager.get_all()
-
-    def get_enabled_providers(self):
-        return self.provider_manager.get_enabled()
-
-    def get_disabled_providers(self):
-        return self.provider_manager.get_disabled()
-
-    def add_providers(self, path: str):
-        self.provider_manager.add(path)
-
-    def disable_provider(self, provider: Union[str, TorrentProvider]):
-        self.provider_manager.disable(provider)
-
-    def enable_provider(self, provider: Union[str, TorrentProvider]):
-        self.provider_manager.enable(provider)
-
-    def remove_provider(self, provider: Union[str, TorrentProvider]):
-        self.provider_manager.remove(provider)
+    def get_providers(self, name=None, enabled=None) -> List[TorrentProvider]:
+        return self.provider_manager.getall(name=name, enabled=enabled)
 
     def get_provider(self, provider_id: str) -> Optional[TorrentProvider]:
         return self.provider_manager.get(provider_id)
 
-    def _search(self, provider: TorrentProvider, query: str, limit: int):
-        logger.debug("Provider {} running on thread: {} ({})"
-                     .format(provider.id, current_thread().name,
-                             current_thread().ident))
-        torrents = []
+    def add_providers(self, path: str):
+        logger.debug("Adding providers from file: '{}'".format(path))
         try:
-            torrents = provider.search(query, limit)
-        except TorrentProviderError as e:
-            self.errors.append(e)
-        return torrents
+            self.provider_manager.add(path)
+        except (IOError, json.JSONDecodeError, jsonschema.ValidationError) as e:
+            message = "Failed to add providers from file '{}': {}" \
+                      .format(path, str(e))
+            raise TorrentSearchEngineError(message) from None
+
+    def disable_providers(self, *providers: List[str]):
+        logger.debug("Disabling providers: {}".format(providers))
+        self.provider_manager.disable(provider)
+
+    def enable_providers(self, *providers: List[str]):
+        logger.debug("Enabling providers: {}".format(providers))
+        self.provider_manager.enable(provider)
+
+    def remove_providers(self, *providers: List[str]):
+        logger.debug("Removing providers: {}".format(providers))
+        self.provider_manager.remove(*providers)
+
+    def _multithreaded_search(self, providers: List[TorrentProvider],
+                              query: str, limit: int, n_workers: int):
+
+        def job(provider: TorrentProvider, query: str, limit: int):
+            logger.debug("Search on provider {} ({}) running on thread: {} ({})"
+                         .format(provider.name, provider.id,
+                                 current_thread().name,
+                                 current_thread().ident))
+            torrents = []
+            try:
+                torrents = provider.search(query, limit)
+            except TorrentProviderError as e:
+                # save errors in the list
+                self.errors.append(e)
+            return torrents
+
+        executor = ThreadPoolExecutor(n_workers)
+
+        args = [providers, [query]*len(providers), [limit]*len(providers)]
+
+        results = executor.map(job, *args)
+        results = [item for sublist in results for item in sublist]
+
+        return results
+
+    def _filter(self, items: List[Torrent]):
+        # find duplicats and keep only the one with more seeds
+        filtered = []
+        for item in items:
+            duplicate = False
+            for idx in range(len(filtered)):
+                if item.title == filtered[idx].title:
+                    duplicate = True
+                    # replace the item only if it has more seeds
+                    if item.seeds > filtered[idx].seeds:
+                        filtered[idx] = item
+            if not duplicate:
+                # add the item only if its not a duplicate
+                filtered.append(item)
+        return filtered
+
+    def _sort(self, items: List[Torrent]) -> List[Torrent]:
+        return sorted(items, key=lambda item: item.seeds, reverse=True)

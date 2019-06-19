@@ -58,5 +58,12 @@ class TorrentProvider(ABC):
 
         return response
 
+    def asdict(self) -> dict:
+        return {
+            "id": self.id,
+            "name": self.name,
+            "url": self.url
+        }
+
     def __str__(self):
-        return self.name
+        return self.id

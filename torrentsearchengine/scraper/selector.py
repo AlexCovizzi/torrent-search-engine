@@ -8,9 +8,11 @@ class Selector:
         self.attr = attr
         self.re = re
 
+    def asdict(self) -> dict:
+        return {"css": self.css, "attr": self.attr, "re": self.re}
+
     def __str__(self):
-        return "(css: {css}, attr: {attr}, re: {re})" \
-                .format(css=self.css, attr=self.attr, re=self.re)
+        return str(self.asdict())
 
     @staticmethod
     def parse(selector: str) -> "Selector":

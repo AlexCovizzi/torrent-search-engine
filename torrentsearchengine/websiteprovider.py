@@ -14,7 +14,8 @@ class WebsiteTorrentProvider(TorrentProvider):
     def __init__(self, pid: str, **kwargs: dict):
         kwargs = KwArgs(kwargs)
 
-        name = kwargs.getstr('name', pid)
+        name = kwargs.getstr('name')
+        name = pid if not name else name
         url = kwargs.getstr('url')
         headers = kwargs.getdict('headers')
 
@@ -102,3 +103,21 @@ class WebsiteTorrentProvider(TorrentProvider):
         torrent._magnet = magnet
 
         return magnet
+
+    def asdict(self) -> dict:
+        return {
+            "id": self.id,
+            "name": self.name,
+            "url": self.url,
+            "headers": self.headers,
+            "search": self.search_path,
+            "whitespace": self.whitespace_char,
+            "list": {
+                "items": self.items_selector.asdict(),
+                "item": {key: selector.asdict() for key, selector
+                         in self.list_item_selectors.items()},
+                "next": self.next_page_url_selector.asdict()
+            },
+            "item": {key: selector.asdict() for key, selector
+                     in self.item_selectors.items()}
+        }
