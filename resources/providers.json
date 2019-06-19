@@ -20,9 +20,6 @@
         "name": "1337x",
         "url": "https://www.1337x.am",
         "search": "/search/{query}/1/",
-        "headers": {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.157 Safari/537.36"
-        },
         "list": {
             "items": "table.table-list > tbody > tr",
             "item": {
