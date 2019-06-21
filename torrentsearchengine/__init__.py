@@ -48,30 +48,34 @@ class TorrentSearchEngine:
 
         return torrents
 
-    def get_providers(self, name=None, enabled=None) -> List[TorrentProvider]:
-        return self.provider_manager.getall(name=name, enabled=enabled)
+    def get_providers(self, enabled=None) -> List[TorrentProvider]:
+        return self.provider_manager.get_all(enabled=enabled)
 
-    def get_provider(self, provider_id: str) -> Optional[TorrentProvider]:
-        return self.provider_manager.get(provider_id)
+    def get_provider(self, provider_name: str) -> Optional[TorrentProvider]:
+        return self.provider_manager.get(provider_name)
 
-    def add_providers(self, path: str):
+    def add_providers(self, *providers: List[TorrentProvider]):
+        logger.debug("Adding providers: {}".format(providers))
+        self.provider_manager.add(*providers)
+
+    def add_providers_from_file(self, path: str):
         logger.debug("Adding providers from file: '{}'".format(path))
         try:
-            self.provider_manager.add(path)
+            self.provider_manager.add_from_file(path)
         except (IOError, json.JSONDecodeError, jsonschema.ValidationError) as e:
             message = "Failed to add providers from file '{}': {}" \
                       .format(path, str(e))
             raise TorrentSearchEngineError(message) from None
 
-    def disable_providers(self, *providers: List[str]):
+    def disable_providers(self, *providers: List[Union[str, TorrentProvider]]):
         logger.debug("Disabling providers: {}".format(providers))
-        self.provider_manager.disable(provider)
+        self.provider_manager.disable(*providers)
 
-    def enable_providers(self, *providers: List[str]):
+    def enable_providers(self, *providers: List[Union[str, TorrentProvider]]):
         logger.debug("Enabling providers: {}".format(providers))
-        self.provider_manager.enable(provider)
+        self.provider_manager.enable(*providers)
 
-    def remove_providers(self, *providers: List[str]):
+    def remove_providers(self, *providers: List[Union[str, TorrentProvider]]):
         logger.debug("Removing providers: {}".format(providers))
         self.provider_manager.remove(*providers)
 
@@ -79,8 +83,8 @@ class TorrentSearchEngine:
                               query: str, limit: int, n_workers: int):
 
         def job(provider: TorrentProvider, query: str, limit: int):
-            logger.debug("Search on provider {} ({}) running on thread: {} ({})"
-                         .format(provider.name, provider.id,
+            logger.debug("Search on provider {} running on thread: {} ({})"
+                         .format(provider.name,
                                  current_thread().name,
                                  current_thread().ident))
             torrents = []

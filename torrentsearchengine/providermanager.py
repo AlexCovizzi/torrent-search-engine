@@ -14,7 +14,11 @@ class TorrentProviderManager:
     def __init__(self):
         self.providers = {}
 
-    def add(self, path: str):
+    def add(self, *providers: List[TorrentProvider]):
+        for provider in providers:
+            self._add(provider)
+
+    def add_from_file(self, path: str):
         with open(path, 'r', encoding='utf-8') as f:
             pdict = json.load(f)
 
@@ -22,66 +26,61 @@ class TorrentProviderManager:
 
         for key, value in pdict.items():
             provider = WebsiteTorrentProvider(key, **value)
-            self.add_one(key, provider)
+            self._add(provider)
 
-    def add_one(self, provider: TorrentProvider):
-            provider_dict = {"provider": provider, "enabled": True}
-            self.providers[provider.id] = provider_dict
+    def get(self, name: str) -> Optional[TorrentProvider]:
+        return self.providers.get(name, None)
 
-            logger.debug("Added provider:\n{}"
-                         .format(json.dumps(provider.asdict(), indent=2,
-                                            sort_keys=True)))
+    def get_all(self, enabled=None) -> List[TorrentProvider]:
+        return [provider
+                for provider in self.providers.values()
+                if enabled is None or enabled == provider.enabled]
 
-    def clear(self):
-        n_providers = len(self.providers.items())
-        self.providers = {}
-        logger.debug("Cleared providers ({}): ".format(n_providers))
+    def remove(self, *providers: List[Union[TorrentProvider, str]]):
+        for provider in providers:
+            self._remove(provider)
 
-    def remove(self, *names: List[str]):
-        for name in names:
-            self._remove(name)
+    def remove_all(self):
+        providers = self.get_all()
+        self.remove(*providers)
 
-    def disable(self, *names: List[str]):
-        for name in names:
-            self._disable(name)
+    def disable(self, *providers: List[Union[TorrentProvider, str]]):
+        for provider in providers:
+            self._disable(provider)
 
-    def enable(self, *names: List[str]):
-        for name in names:
-            self._enable(name)
+    def disable_all(self):
+        providers = self.get_all()
+        self.disable(*providers)
 
-    def getall(self, name=None, enabled=None) -> List[TorrentProvider]:
-        return [item.get("provider")
-                for item in self.providers.values()
-                if (name is None or name == item["provider"].name) and
-                   (enabled is None or enabled == item["enabled"])]
+    def enable(self, *providers: List[Union[TorrentProvider, str]]):
+        for provider in providers:
+            self._enable(provider)
 
-    def get(self, pid: str) -> Optional[TorrentProvider]:
-        item = self.providers.get(pid)
-        if item:
-            return item["provider"]
-        else:
-            return None
+    def enable_all(self):
+        providers = self.get_all()
+        self.enable(*providers)
 
-    def _remove(self, name: str):
-        rem = []
-        for key, value in self.providers.items():
-            provider = value["provider"]
-            if provider.name == name:
-                rem.append(key)
-        for key in rem:
-            del self.providers[key]
-            logger.debug("Removed provider: {}".format(key))
+    def _add(self, provider: TorrentProvider):
+        self.providers[provider.name] = provider
 
-    def _disable(self, name: str):
-        for key, value in self.providers.items():
-            provider = value["provider"]
-            if provider.name == name:
-                value["enabled"] = False
-                logger.debug("Disabled provider: {}".format(provider_id))
+        logger.debug("Added provider:\n{}".format(json.dumps(provider.asdict(),
+                                                  indent=2, sort_keys=True)))
 
-    def _enable(self, name: str):
-        for key, value in self.providers.items():
-            provider = value["provider"]
-            if provider.name == name:
-                value["enabled"] = True
-                logger.debug("Enabled provider: {}".format(provider_id))
+    def _remove(self, provider: Union[str, TorrentProvider]):
+        provider_name = provider.name if isinstance(provider, TorrentProvider) \
+                                  else provider
+        if provider_name in self.providers:
+            del self.providers[provider_name]
+            logger.debug("Removed provider: {}".format(provider_name))
+
+    def _disable(self, provider: Union[str, TorrentProvider]):
+        provider = provider if isinstance(provider, TorrentProvider) \
+                            else self.providers.get(provider, None)
+        if provider:
+            provider.disable()
+
+    def _enable(self, provider: Union[str, TorrentProvider]):
+        provider = provider if isinstance(provider, TorrentProvider) \
+                            else self.providers.get(provider_id, None)
+        if provider:
+            provider.enable()

@@ -1,6 +1,5 @@
 {
-    "eztv.yt": {
-        "name": "EZTV",
+    "eztv": {
         "url": "https://eztv.yt",
         "search": "/search/{query}",
         "list": {
@@ -16,8 +15,7 @@
             }
         }
     },
-    "1337x.am": {
-        "name": "1337x",
+    "1337x": {
         "url": "https://www.1337x.am",
         "search": "/search/{query}/1/",
         "list": {
@@ -36,8 +34,7 @@
             "magnet": "ul.download-links-dontblock > li > a @ href"
         }
     },
-    "magnetdl.com": {
-        "name": "magnetdl",
+    "magnetdl": {
         "url": "https://www.magnetdl.com",
         "search": "/{query[0]}/{query}/",
         "whitespace": "-",

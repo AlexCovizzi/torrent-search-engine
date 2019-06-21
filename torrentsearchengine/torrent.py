@@ -29,7 +29,7 @@ class Torrent:
 
         self._magnet = kwargs.getstr('magnet')
 
-        self.id = (self.provider.id if self.provider else "") + ";" + self.title
+        self.id = str(self.provider) + ";" + self.title
 
     def fetch_magnet(self) -> str:
         """
@@ -42,7 +42,7 @@ class Torrent:
         return self.provider.fetch_magnet(self)
 
     def asdict(self) -> dict:
-        return {"id": self.id, "provider": self.provider.id,
+        return {"id": self.id, "provider": self.provider.name,
                 "title": self.title, "url": self.url, "size": self.size,
                 "seeds": self.seeds, "leechers": self.leechers}
 

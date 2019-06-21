@@ -11,13 +11,10 @@ from torrentsearchengine.torrent import Torrent
 
 class WebsiteTorrentProvider(TorrentProvider):
 
-    def __init__(self, pid: str, **kwargs: dict):
+    def __init__(self, name: str, **kwargs: dict):
         kwargs = KwArgs(kwargs)
 
-        name = kwargs.getstr('name')
-        name = pid if not name else name
         url = kwargs.getstr('url')
-        headers = kwargs.getdict('headers')
 
         list_section = KwArgs(kwargs.getdict('list'))
         list_item_section = KwArgs(list_section.getdict('item'))
@@ -26,6 +23,7 @@ class WebsiteTorrentProvider(TorrentProvider):
         next_page_url_selector_str = list_section.getstr('next')
         items_selector_str = list_section.getstr('items')
 
+        self.headers = kwargs.getdict('headers')
         self.search_path = kwargs.getstr('search')
         self.whitespace_char = kwargs.getstr('whitespace')
         self.next_page_url_selector = Selector.parse(next_page_url_selector_str)
@@ -35,9 +33,12 @@ class WebsiteTorrentProvider(TorrentProvider):
         self.item_selectors = {key: Selector.parse(str(s))
                                for key, s in item_section.items()}
 
-        super(WebsiteTorrentProvider, self).__init__(pid, name, url, headers)
+        super(WebsiteTorrentProvider, self).__init__(name, url)
 
     def search(self, query: str, limit: int = 0) -> List[Torrent]:
+        if not self.enabled:
+            return []
+
         torrents = []
         remaining = limit
 
@@ -50,7 +51,7 @@ class WebsiteTorrentProvider(TorrentProvider):
 
         while path and (limit == 0 or remaining > 0):
             try:
-                response = self.fetch(path)
+                response = self.fetch(path, headers=self.headers)
             except TorrentProviderRequestError as e:
                 raise TorrentProviderSearchError(self, query, e.request) from e
 
@@ -106,7 +107,6 @@ class WebsiteTorrentProvider(TorrentProvider):
 
     def asdict(self) -> dict:
         return {
-            "id": self.id,
             "name": self.name,
             "url": self.url,
             "headers": self.headers,

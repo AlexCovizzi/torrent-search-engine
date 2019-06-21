@@ -12,10 +12,6 @@ TORRENT_PROVIDER_SCHEMA = {
                 "list"
             ],
             "properties": {
-                "name": {
-                    "type": "string",
-                    "default": ""
-                },
                 "url": {
                     "type": "string"
                 },

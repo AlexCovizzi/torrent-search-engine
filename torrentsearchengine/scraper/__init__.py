@@ -4,9 +4,10 @@ from torrentsearchengine.scraper.element import Element, NullElement
 
 class Scraper(Element):
 
-    def __init__(self, markup: str = ''):
+    def __init__(self, markup: str = '', encoding: str = None):
         try:
-            parser = BeautifulSoup(markup, 'html.parser')
+            parser = BeautifulSoup(markup, 'html.parser',
+                                   from_encoding=encoding)
         except ValueError:
             parser = NullElement()
 
