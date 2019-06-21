@@ -13,41 +13,45 @@ class FakeTorrentProvider(TorrentProvider):
         return ""
 
 
-def test_get_should_return_the_provider_with_the_id_passed_as_argument():
+def test_add_should_add_the_providers_passed_as_argument():
     provider_manager = TorrentProviderManager()
-    provider1 = FakeTorrentProvider("id1", "name1", "url1")
-    provider2 = FakeTorrentProvider("id2", "name2", "url2")
-    provider_manager.add_one(provider1)
-    provider_manager.add_one(provider2)
+    provider1 = FakeTorrentProvider("name1", "url1")
+    provider2 = FakeTorrentProvider("name2", "url2")
+    provider_manager.add(provider1, provider2)
 
-    provider_by_id = provider_manager.get(provider1.id)
+    returned_provider1 = provider_manager.get(provider1.name)
+    returned_provider2 = provider_manager.get(provider2.name)
 
-    assert provider_by_id.id == provider1.id
+    assert returned_provider1 == provider1
+    assert returned_provider2 == provider2
 
 
-def test_getall_should_return_the_providers_with_the_name_passed_as_argument():
+def test_disable_should_disable_the_provider_passed_as_argument():
     provider_manager = TorrentProviderManager()
-    provider1 = FakeTorrentProvider("id1", "name", "url1")
-    provider2 = FakeTorrentProvider("id2", "name", "url2")
-    provider3 = FakeTorrentProvider("id3", "name2", "url2")
-    provider4 = FakeTorrentProvider("id4", "name3", "url2")
-    provider_manager.add_one(provider1)
-    provider_manager.add_one(provider2)
-    provider_manager.add_one(provider3)
-    provider_manager.add_one(provider4)
+    provider = FakeTorrentProvider("name", "url", enabled=True)
+    provider_manager.add(provider)
 
-    providers_by_name = provider_manager.getall(name=provider1.name)
+    provider_manager.disable(provider.name)
 
-    assert len(providers_by_name) == 2
-    assert providers_by_name[0].name == provider1.name
-    assert providers_by_name[1].name == provider1.name
+    assert not provider.enabled
 
 
-def test_add_one_should_add_the_provider():
+def test_enable_should_enable_the_provider_passed_as_argument():
     provider_manager = TorrentProviderManager()
-    provider = FakeTorrentProvider("id", "name", "url")
-    provider_manager.add_one(provider)
+    provider = FakeTorrentProvider("name", "url", enabled=True)
+    provider_manager.add(provider)
 
-    provider_by_id = provider_manager.get(provider.id)
+    provider_manager.enable(provider.name)
 
-    assert provider_by_id == provider
+    assert provider.enabled
+
+
+def test_remove_should_remove_the_provider_passed_as_argument():
+    provider_manager = TorrentProviderManager()
+    provider = FakeTorrentProvider("name", "url", enabled=True)
+    provider_manager.add(provider)
+
+    provider_manager.remove(provider.name)
+
+    assert not provider_manager.get(provider.name)
+

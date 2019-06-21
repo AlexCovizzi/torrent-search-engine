@@ -8,10 +8,10 @@ from torrentsearchengine.torrent import Torrent
 
 class TorrentProvider(ABC):
 
-    def __init__(self, name: str, url: str):
+    def __init__(self, name: str, url: str, enabled=True):
         self.name = name
         self.url = url
-        self.enabled = True
+        self.enabled = enabled
 
     @abstractmethod
     def search(self, query: str, limit: int = 25) -> List[Torrent]:
@@ -38,6 +38,18 @@ class TorrentProvider(ABC):
         Returns:
             str - The torrent magnet uri or an empty
                   string if the magnet is not found.
+        """
+        pass
+
+    def fetch_info(self, torrent: Torrent) -> dict:
+        """
+        Fetch more infos for this torrent.
+
+        Parameters:
+            torrent: Torrent - The torrent of which to fetch more infos.
+
+        Returns:
+            dict - Dictionary with all the infos found.
         """
         pass
 

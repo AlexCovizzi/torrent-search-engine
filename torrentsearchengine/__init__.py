@@ -54,11 +54,7 @@ class TorrentSearchEngine:
     def get_provider(self, provider_name: str) -> Optional[TorrentProvider]:
         return self.provider_manager.get(provider_name)
 
-    def add_providers(self, *providers: List[TorrentProvider]):
-        logger.debug("Adding providers: {}".format(providers))
-        self.provider_manager.add(*providers)
-
-    def add_providers_from_file(self, path: str):
+    def add_providers(self, path: str):
         logger.debug("Adding providers from file: '{}'".format(path))
         try:
             self.provider_manager.add_from_file(path)

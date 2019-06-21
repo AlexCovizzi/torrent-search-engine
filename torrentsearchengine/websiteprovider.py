@@ -65,7 +65,6 @@ class WebsiteTorrentProvider(TorrentProvider):
                                .attr(selector.attr) \
                                .re(selector.re)
                     props[key] = prop
-
                 torrent = Torrent(**props)
                 torrents.append(torrent)
 
@@ -81,14 +80,17 @@ class WebsiteTorrentProvider(TorrentProvider):
         if torrent._magnet:
             return torrent._magnet
 
+        info = self.fetch_info(torrent)
+
+        return info.get("magnet", "")
+
+    def fetch_info(self, torrent: Torrent) -> dict:
+        if torrent._info:
+            return torrent._info
+
         # retrieve the torrent info page url
         path = torrent.url
         if not path:
-            return ''
-
-        # retrieve the magnet selector
-        selector = self.item_selectors.get('magnet')
-        if not selector:
             return ''
 
         # fetch the torrent info page and scrape
@@ -96,14 +98,19 @@ class WebsiteTorrentProvider(TorrentProvider):
 
         scraper = Scraper(response.text)
 
-        magnet = scraper.select_one(selector.css) \
-                        .attr(selector.attr) \
-                        .re(selector.re)
+        props = {}
+        for key, selector in self.item_selectors.items():
+            prop = scraper.select_one(selector.css) \
+                          .attr(selector.attr) \
+                          .re(selector.re)
+            props[key] = prop
 
-        # save the magnet in the torrent
-        torrent._magnet = magnet
+        if "magnet" in props:
+            torrent._magnet = props.get("magnet", "")
 
-        return magnet
+        torrent._info = props
+
+        return props
 
     def asdict(self) -> dict:
         return {

@@ -81,6 +81,6 @@ class TorrentProviderManager:
 
     def _enable(self, provider: Union[str, TorrentProvider]):
         provider = provider if isinstance(provider, TorrentProvider) \
-                            else self.providers.get(provider_id, None)
+                            else self.providers.get(provider, None)
         if provider:
             provider.enable()

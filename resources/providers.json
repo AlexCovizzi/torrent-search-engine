@@ -36,7 +36,7 @@
     },
     "magnetdl": {
         "url": "https://www.magnetdl.com",
-        "search": "/{query[0]}/{query}/",
+        "search": "/{query[0]}/{query}/se/desc/",
         "whitespace": "-",
         "headers": {
             "Accept": "*/*;"
@@ -53,6 +53,41 @@
                 "magnet": "td.m > a @ href"
             },
             "next": "#pages > a:contains(Next) @ href"
+        }
+    },
+    "ettv": {
+        "url": "https://www.ettv.to",
+        "search": "/torrents-search.php?search={query}",
+        "list": {
+            "items": "table > tr",
+            "next": "div.myFrame-content > div > p > a:contains(Next) @ href",
+            "item": {
+                "title": "td:nth-of-type(2) > a > b @ text",
+                "url": "td:nth-of-type(2) > a @ href",
+                "time": "td:nth-of-type(3) @ text",
+                "size": "td:nth-of-type(4) @ text",
+                "seeds": "td:nth-of-type(6) > font > b @ text",
+                "leechers": "td:nth-of-type(7) > font > b @ text"
+            }
+        },
+        "item": {
+            "magnet": "a.download-link @ href"
+        }
+    },
+    "rarbg": {
+        "url": "http://rarbgproxy.org/",
+        "search": "/torrents.php?search={query}&order=seeders&by=DESC",
+        "list": {
+            "items": "table.lista2t > tbody > tr.lista2",
+            "next": "#pager_links > a[title='next page'] @ href",
+            "item": {
+                "title": "td.lista:nth-of-type(2) > a[onmouseover] @ text",
+                "url": "td.lista:nth-of-type(2) > a[onmouseover] @ href",
+                "time": "td.lista:nth-of-type(3) @ text",
+                "size": "td.lista:nth-of-type(4) @ text",
+                "seeds": "td.lista:nth-of-type(5) > font @ text",
+                "leechers": "td.lista:nth-of-type(6) @ text"
+            }
         }
     }
 }
