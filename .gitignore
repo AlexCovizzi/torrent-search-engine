@@ -109,7 +109,3 @@ venv.bak/
 
 # test
 .pytest_cache/
-
-# pipfile things
-Pipfile
-Pipfile.lock
