@@ -11,13 +11,25 @@ requirements_dev = [
     "pytest"
 ]
 
+with open("README.md", "r") as fh:
+    long_description = fh.read()
+
 setup(
     name="TorrentSearchEngine",
-    version="1.0",
+    version="1.0.0",
+    author="Alex Covizzi",
+    description="Search torrents from your favourite websites",
+    long_description=long_description,
+    url="https://github.com/AlexCovizzi/torrent-search-engine",
     packages=find_packages(exclude="tests"),
     python_requires=">=3.5",
     install_requires=requirements,
     extras_require={
         "dev": requirements_dev
-    }
+    },
+    classifiers=[
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: Apache Software License"
+        "Operating System :: OS Independent",
+    ],
 )
