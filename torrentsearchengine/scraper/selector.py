@@ -1,15 +1,19 @@
 from re import match
+import soupsieve
 
 
 class Selector:
 
-    def __init__(self, css: str = '', attr: str = None, re: str = None):
+    def __init__(self, css: str = '', attr: str = None, re: str = None,
+                 fmt: str = None):
         self.css = css
         self.attr = attr
         self.re = re
+        self.fmt = fmt
 
     def asdict(self) -> dict:
-        return {"css": self.css, "attr": self.attr, "re": self.re}
+        return {"css": self.css, "attr": self.attr, "re": self.re,
+                "fmt": self.fmt}
 
     def __str__(self):
         return str(self.asdict())
@@ -31,14 +35,21 @@ class Selector:
         attr = attr_selector_parts[1] if len(attr_selector_parts) > 1 else None
 
         regex = None
-        re_part = parts[1] if len(parts) > 1 and \
-            parts[1].startswith('re:') else None
-        if re_part:
-            m = match(r"re:\s*(.*)\s*", re_part)
-            if m:
-                regex = m.group(1).strip()
+        fmt = None
+        for part in parts[1:]:
+            if part.startswith('re:'):
+                m = match(r"re:\s*(.*)\s*", part)
+                if m:
+                    regex = m.group(1).strip()
+            elif part.startswith('fmt:'):
+                m = match(r"fmt:\s*(.*)\s*", part)
+                if m:
+                    fmt = m.group(1).strip()
 
-        return Selector(css, attr, regex)
+        if css:
+            soupsieve.compile(css)
+
+        return Selector(css, attr, regex, fmt)
 
 
 class NullSelector(Selector):

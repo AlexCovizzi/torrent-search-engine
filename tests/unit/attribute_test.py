@@ -39,3 +39,17 @@ def test_re_returns_the_value_as_string_if_regex_is_empty():
     val = 1234
     attr = Attribute(val)
     assert attr.re("") == "1234"
+
+
+def test_re_with_fmt_returns_the_replaced_string():
+    val = "ciao sono alex"
+    regex = r"(\s)"
+    fmt = r"_"
+    attr = Attribute(val)
+    assert attr.re(regex, fmt) == "ciao_sono_alex"
+
+    val = "ciao sono alex"
+    regex = r"(\w+) (\w+) (\w+)"
+    fmt = r"\1:\2:\3"
+    attr = Attribute(val)
+    assert attr.re(regex, fmt) == "ciao:sono:alex"

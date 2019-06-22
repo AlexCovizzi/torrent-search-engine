@@ -58,7 +58,7 @@ class TorrentSearchEngine:
         logger.debug("Adding providers from file: '{}'".format(path))
         try:
             self.provider_manager.add_from_file(path)
-        except (IOError, json.JSONDecodeError, jsonschema.ValidationError) as e:
+        except Exception as e:
             message = "Failed to add providers from file '{}': {}" \
                       .format(path, str(e))
             raise TorrentSearchEngineError(message) from None

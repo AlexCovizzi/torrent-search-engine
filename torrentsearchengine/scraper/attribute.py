@@ -10,15 +10,19 @@ class Attribute:
     def get(self) -> Any:
         return self.value
 
-    def re(self, regex: str) -> str:
+    def re(self, regex: str, fmt: str = None) -> str:
         if not regex:
             return self.to_string()
 
         value = self.value if isinstance(self.value, str) else self.to_string()
-
-        match = re.match(regex, value)
-        if match:
-            value = match.group(0)
+        # if no format is specified we just return the matched string
+        if not fmt:
+            match = re.match(regex, value)
+            if match:
+                value = match.group(0)
+        # otherwise we replace
+        else:
+            value = re.sub(regex, fmt, value)
 
         return value
 

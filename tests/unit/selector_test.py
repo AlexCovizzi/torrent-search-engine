@@ -8,14 +8,16 @@ def test_parse_returns_the_correct_selector():
     assert selector.css == "parent > child:focus"
     assert selector.attr == "text"
     assert selector.re == "[A-Z]+"
+    assert selector.fmt == None
 
 
 def test_parse_returns_selector_with_no_attr():
-    s = "parent > child:focus | re: \\w+"
+    s = "parent > child:focus | fmt: \\1he |re: \\w+ | "
     selector = Selector.parse(s)
     assert selector.css == "parent > child:focus"
     assert selector.attr is None
     assert selector.re == "\\w+"
+    assert selector.fmt == "\\1he"
 
 
 def test_parse_returns_selector_with_no_re():
@@ -24,11 +26,13 @@ def test_parse_returns_selector_with_no_re():
     assert selector.css == "parent > .child:focus"
     assert selector.attr == "text"
     assert selector.re is None
+    assert selector.fmt is None
 
 
 def test_parse_returns_selector_with_no_attr_and_re():
-    s = "parent > child:focus"
+    s = "parent > child:focus | fmt: "
     selector = Selector.parse(s)
     assert selector.css == "parent > child:focus"
     assert selector.attr is None
     assert selector.re is None
+    assert selector.fmt == ""

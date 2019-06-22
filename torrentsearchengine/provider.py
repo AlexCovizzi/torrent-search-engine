@@ -1,9 +1,13 @@
 from typing import List
 from abc import ABC, abstractmethod
 import requests
+import logging
 from torrentsearchengine.utils import urljoin, urlfix
 from torrentsearchengine.exceptions import TorrentProviderRequestError
 from torrentsearchengine.torrent import Torrent
+
+
+logger = logging.getLogger(__name__)
 
 
 class TorrentProvider(ABC):
@@ -41,18 +45,6 @@ class TorrentProvider(ABC):
         """
         pass
 
-    def fetch_info(self, torrent: Torrent) -> dict:
-        """
-        Fetch more infos for this torrent.
-
-        Parameters:
-            torrent: Torrent - The torrent of which to fetch more infos.
-
-        Returns:
-            dict - Dictionary with all the infos found.
-        """
-        pass
-
     def fetch(self, path: str, **kwargs) -> requests.Response:
         url = urljoin(self.url, path)
         url = urlfix(url)
@@ -71,9 +63,11 @@ class TorrentProvider(ABC):
 
     def enable(self):
         self.enabled = True
+        logger.debug("{}: enabled.".format(self))
 
     def disable(self):
         self.enabled = False
+        logger.debug("{}: disabled.".format(self))
 
     def asdict(self) -> dict:
         return {

@@ -63,15 +63,14 @@ class TorrentProviderManager:
     def _add(self, provider: TorrentProvider):
         self.providers[provider.name] = provider
 
-        logger.debug("Added provider:\n{}".format(json.dumps(provider.asdict(),
-                                                  indent=2, sort_keys=True)))
+        logger.debug("Added provider: {}".format(provider))
 
     def _remove(self, provider: Union[str, TorrentProvider]):
-        provider_name = provider.name if isinstance(provider, TorrentProvider) \
+        provider = provider.name if isinstance(provider, TorrentProvider) \
                                   else provider
-        if provider_name in self.providers:
-            del self.providers[provider_name]
-            logger.debug("Removed provider: {}".format(provider_name))
+        if provider in self.providers:
+            del self.providers[provider]
+            logger.debug("Removed provider: {}".format(provider))
 
     def _disable(self, provider: Union[str, TorrentProvider]):
         provider = provider if isinstance(provider, TorrentProvider) \

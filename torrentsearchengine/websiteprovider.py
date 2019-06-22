@@ -1,12 +1,16 @@
 from typing import Any, List
 import re
 import requests
+import logging
 from torrentsearchengine.utils import KwArgs
 from torrentsearchengine.exceptions import *
 from torrentsearchengine.provider import TorrentProvider
 from torrentsearchengine.scraper import Scraper
 from torrentsearchengine.scraper.selector import Selector, NullSelector
 from torrentsearchengine.torrent import Torrent
+
+
+logger = logging.getLogger(__name__)
 
 
 class WebsiteTorrentProvider(TorrentProvider):
@@ -34,6 +38,8 @@ class WebsiteTorrentProvider(TorrentProvider):
                                for key, s in item_section.items()}
 
         super(WebsiteTorrentProvider, self).__init__(name, url)
+
+        logger.debug("{}: created:\n{}".format(name, self.asdict()))
 
     def search(self, query: str, limit: int = 0) -> List[Torrent]:
         if not self.enabled:
@@ -63,7 +69,7 @@ class WebsiteTorrentProvider(TorrentProvider):
                 for key, selector in self.list_item_selectors.items():
                     prop = item.select_one(selector.css) \
                                .attr(selector.attr) \
-                               .re(selector.re)
+                               .re(selector.re, selector.fmt)
                     props[key] = prop
                 torrent = Torrent(**props)
                 torrents.append(torrent)
@@ -72,7 +78,8 @@ class WebsiteTorrentProvider(TorrentProvider):
 
             path = scraper.select_one(self.next_page_url_selector.css) \
                           .attr(self.next_page_url_selector.attr) \
-                          .re(self.next_page_url_selector.re)
+                          .re(self.next_page_url_selector.re,
+                              self.next_page_url_selector.fmt)
 
         return torrents
 
@@ -80,17 +87,14 @@ class WebsiteTorrentProvider(TorrentProvider):
         if torrent._magnet:
             return torrent._magnet
 
-        info = self.fetch_info(torrent)
-
-        return info.get("magnet", "")
-
-    def fetch_info(self, torrent: Torrent) -> dict:
-        if torrent._info:
-            return torrent._info
-
         # retrieve the torrent info page url
         path = torrent.url
         if not path:
+            return ''
+
+        # retrieve the magnet selector
+        selector = self.item_selectors.get("magnet")
+        if not selector:
             return ''
 
         # fetch the torrent info page and scrape
@@ -98,19 +102,13 @@ class WebsiteTorrentProvider(TorrentProvider):
 
         scraper = Scraper(response.text)
 
-        props = {}
-        for key, selector in self.item_selectors.items():
-            prop = scraper.select_one(selector.css) \
-                          .attr(selector.attr) \
-                          .re(selector.re)
-            props[key] = prop
+        magnet = scraper.select_one(selector.css) \
+                        .attr(selector.attr) \
+                        .re(selector.re, selector.fmt)
 
-        if "magnet" in props:
-            torrent._magnet = props.get("magnet", "")
+        torrent._magnet = magnet
 
-        torrent._info = props
-
-        return props
+        return magnet
 
     def asdict(self) -> dict:
         return {

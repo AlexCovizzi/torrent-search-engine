@@ -28,7 +28,6 @@ class Torrent:
         self.leechers = kwargs.getint('leechers', -1)
 
         self._magnet = kwargs.getstr('magnet')
-        self._info = kwargs.getdict('info')
 
         self.id = str(self.provider) + ";" + self.title
 
@@ -41,9 +40,6 @@ class Torrent:
                   string if the magnet is not found.
         """
         return self.provider.fetch_magnet(self)
-
-    def fetch_info(self) -> dict:
-        return self.provider.fetch_info(self)
 
     def asdict(self) -> dict:
         return {"id": self.id, "provider": self.provider.name,
