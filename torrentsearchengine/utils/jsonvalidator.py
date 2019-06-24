@@ -1,4 +1,4 @@
-from jsonschema import Draft7Validator, validators
+from jsonschema import Draft4Validator, validators
 
 
 def extend_with_default(validator_class):
@@ -17,4 +17,4 @@ def extend_with_default(validator_class):
     )
 
 
-JsonValidator = extend_with_default(Draft7Validator)
+JsonValidator = extend_with_default(Draft4Validator)

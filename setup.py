@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 requirements = [
     "requests",
     "beautifulsoup4",
-    "jsonschema"
+    "jsonschema>=1.1"
 ]
 
 requirements_dev = [
