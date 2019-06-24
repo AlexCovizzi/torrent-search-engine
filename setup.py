@@ -1,9 +1,9 @@
 from setuptools import setup, find_packages
 
 requirements = [
-    "requests~=2.22",
-    "beautifulsoup4~=4.7",
-    "jsonschema~=3.0"
+    "requests",
+    "beautifulsoup4",
+    "jsonschema"
 ]
 
 requirements_dev = [
