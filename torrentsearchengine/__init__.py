@@ -54,14 +54,35 @@ class TorrentSearchEngine:
     def get_provider(self, provider_name: str) -> Optional[TorrentProvider]:
         return self.provider_manager.get(provider_name)
 
-    def add_providers(self, path: str):
-        logger.debug("Adding providers from file: '{}'".format(path))
-        try:
-            self.provider_manager.add_from_file(path)
-        except Exception as e:
-            message = "Failed to add providers from file '{}': {}" \
-                      .format(path, str(e))
-            raise TorrentSearchEngineError(message) from None
+    def add_providers(self, providers: Union[str, dict]):
+        if isinstance(providers, dict):
+            logger.debug("Adding providers from dictionary")
+            try:
+                self.provider_manager.add_from_dict(providers)
+            except Exception as e:
+                message = "Failed to add providers from dictionary: {}" \
+                        .format(str(e))
+                raise TorrentSearchEngineError(message) from None
+        else:
+            # providers can be url or path
+            if providers.startswith("http"):
+                # url
+                logger.debug("Adding providers from url: '{}'".format(providers))
+                try:
+                    self.provider_manager.add_from_url(providers)
+                except Exception as e:
+                    message = "Failed to add providers from url '{}': {}" \
+                            .format(providers, str(e))
+                    raise TorrentSearchEngineError(message) from None
+            else:
+                # path
+                logger.debug("Adding providers from file: '{}'".format(providers))
+                try:
+                    self.provider_manager.add_from_file(providers)
+                except Exception as e:
+                    message = "Failed to add providers from file '{}': {}" \
+                            .format(providers, str(e))
+                    raise TorrentSearchEngineError(message) from None
 
     def disable_providers(self, *providers: List[Union[str, TorrentProvider]]):
         logger.debug("Disabling providers: {}".format(providers))

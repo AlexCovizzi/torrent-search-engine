@@ -1,6 +1,7 @@
 from typing import List, Union, Optional
 import json
 import logging
+import requests
 from torrentsearchengine.providervalidator import torrent_provider_validator
 from torrentsearchengine.provider import TorrentProvider
 from torrentsearchengine.websiteprovider import WebsiteTorrentProvider
@@ -18,15 +19,24 @@ class TorrentProviderManager:
         for provider in providers:
             self._add(provider)
 
-    def add_from_file(self, path: str):
-        with open(path, 'r', encoding='utf-8') as f:
-            pdict = json.load(f)
-
+    def add_from_dict(self, pdict):
         torrent_provider_validator.validate(pdict)
 
         for key, value in pdict.items():
             provider = WebsiteTorrentProvider(key, **value)
             self._add(provider)
+
+    def add_from_file(self, path: str):
+        with open(path, 'r', encoding='utf-8') as f:
+            pdict = json.load(f)
+
+        self.add_from_dict(pdict)
+
+    def add_from_url(self, url: str):
+        response = requests.get(url)
+        response.raise_for_status()
+        pdict = json.loads(response.text)
+        self.add_from_dict(pdict)
 
     def get(self, name: str) -> Optional[TorrentProvider]:
         return self.providers.get(name, None)
