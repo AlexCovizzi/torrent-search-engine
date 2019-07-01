@@ -44,7 +44,8 @@ class Torrent:
     def asdict(self) -> dict:
         return {"id": self.id, "provider": self.provider.name,
                 "title": self.title, "url": self.url, "size": self.size,
-                "seeds": self.seeds, "leechers": self.leechers}
+                "time": self.time, "seeds": self.seeds,
+                "leechers": self.leechers}
 
     def __str__(self):
         return str(self.asdict())

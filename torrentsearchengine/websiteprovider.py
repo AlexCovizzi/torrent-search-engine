@@ -2,7 +2,7 @@ from typing import Any, List
 import re
 import requests
 import logging
-from torrentsearchengine.utils import KwArgs
+from torrentsearchengine.utils import KwArgs, urljoin, urlfix
 from torrentsearchengine.exceptions import *
 from torrentsearchengine.provider import TorrentProvider
 from torrentsearchengine.scraper import Scraper
@@ -71,6 +71,14 @@ class WebsiteTorrentProvider(TorrentProvider):
                                .attr(selector.attr) \
                                .re(selector.re, selector.fmt)
                     props[key] = prop
+
+                # make the url full (with the host)
+                url = props.get('url', '')
+                if not url.startswith('http'):
+                    url = urljoin(self.url, url)
+                    url = urlfix(url)
+                    props['url'] = url
+
                 torrent = Torrent(**props)
                 torrents.append(torrent)
 

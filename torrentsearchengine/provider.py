@@ -45,8 +45,9 @@ class TorrentProvider(ABC):
         """
         pass
 
-    def fetch(self, path: str, **kwargs) -> requests.Response:
-        url = urljoin(self.url, path)
+    def fetch(self, url: str, **kwargs) -> requests.Response:
+        if not url.startswith('http'):
+            url = urljoin(self.url, url)
         url = urlfix(url)
 
         try:
