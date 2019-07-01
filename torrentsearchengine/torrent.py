@@ -1,4 +1,4 @@
-from torrentsearchengine.utils import KwArgs
+from torrentsearchengine.utils import KwArgs, simple_hash
 
 
 class Torrent:
@@ -29,7 +29,7 @@ class Torrent:
 
         self._magnet = kwargs.getstr('magnet')
 
-        self.id = str(self.provider) + ";" + self.title
+        self.id = simple_hash(str(self.provider) + ";" + self.title)
 
     def fetch_magnet(self) -> str:
         """
