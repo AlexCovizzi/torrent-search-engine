@@ -31,7 +31,7 @@
             "next": ".pagination > ul > li.active + li > a @ href"
         },
         "item": {
-            "magnet": "ul.download-links-dontblock > li > a @ href"
+            "magnet": "a:contains(Magnet) @ href"
         }
     },
     "magnetdl": {
@@ -71,7 +71,7 @@
             }
         },
         "item": {
-            "magnet": "a.download-link @ href"
+            "magnet": "a.download_link @ href"
         }
     }
 }
