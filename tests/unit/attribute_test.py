@@ -42,8 +42,8 @@ def test_re_returns_the_value_as_string_if_regex_is_empty():
 
 
 def test_re_with_fmt_returns_the_replaced_string():
-    val = "ciao sono alex"
-    regex = r"(\s)"
+    val = "ciao sono  alex"
+    regex = r"(\s+)"
     fmt = r"_"
     attr = Attribute(val)
     assert attr.re(regex, fmt) == "ciao_sono_alex"

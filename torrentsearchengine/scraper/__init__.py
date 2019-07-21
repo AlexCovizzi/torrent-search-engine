@@ -1,5 +1,5 @@
 from bs4 import BeautifulSoup
-from torrentsearchengine.scraper.element import Element, NullElement
+from .element import Element, NullElement
 
 
 class Scraper(Element):

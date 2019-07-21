@@ -4,7 +4,7 @@ TORRENT_PROVIDER_SCHEMA = {
     "type": "object",
     "default": {},
     "patternProperties": {
-        ".+": {
+        "[\\w\\.\\-\\_]+": {
             "type": "object",
             "required": [
                 "url",
