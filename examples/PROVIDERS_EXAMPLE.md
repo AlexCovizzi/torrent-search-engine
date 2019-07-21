@@ -46,7 +46,7 @@ https://cool-torrent-website.io/big-buck-bunny-1
 
 And this is the configuration file:
 
-```json
+```javascript
 {
     "cool-torrent-website": {
         // base url of the website
