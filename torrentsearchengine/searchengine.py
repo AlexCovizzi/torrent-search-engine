@@ -3,8 +3,10 @@ import json
 import jsonschema
 import logging
 import os
-from concurrent.futures import ThreadPoolExecutor
+import time
+import concurrent.futures
 from threading import current_thread
+import queue
 from torrentsearchengine.exceptions import *
 from torrentsearchengine.providermanager import TorrentProviderManager
 from torrentsearchengine.torrent import Torrent
@@ -18,11 +20,9 @@ class TorrentSearchEngine:
 
     def __init__(self):
         self.provider_manager = TorrentProviderManager()
-        self.errors = []
 
-    def search(self, query: str, limit: int = 0) -> List[Torrent]:
-        # reset errors, we dont care about past errors
-        self.errors = []
+    def search(self, query: str, limit: int = 0, timeout: int = 30,
+               n_threads: int = None) -> List[Torrent]:
 
         # an empty query simply returns no torrent (for now?)
         if not query:
@@ -33,55 +33,61 @@ class TorrentSearchEngine:
         if n_providers == 0:
             return []
 
-        max_workers = (os.cpu_count() or 1) * 5
-        n_workers = n_providers if n_providers < max_workers else max_workers
+        if n_threads is None or n_threads < 1:
+            max_threads = (os.cpu_count() or 1) * 5
+            n_threads = n_providers if n_providers < max_threads \
+                                    else max_threads
 
-        logger.debug("Searching on {} providers ({} threads): '{}' (Max {})"
-                     .format(n_providers, n_workers, query, limit))
+        logger.debug("Searching on {} providers ({} threads): '{}' (limit: {}, timeout: {})"
+                     .format(n_providers, n_threads, query, limit, timeout))
 
         torrents = self._multithreaded_search(providers, query,
-                                              limit, n_workers)
+                                              limit, timeout, n_threads)
 
         torrents = self._filter(torrents)
         torrents = self._sort(torrents)
-        torrents = torrents[:limit] if limit > 0 else torrents
+
+        #torrents = torrents[:limit] if limit > 0 else torrents
 
         return torrents
 
     def get_providers(self, enabled=None) -> List[TorrentProvider]:
         return self.provider_manager.get_all(enabled=enabled)
 
-    def get_provider(self, provider_name: str) -> Optional[TorrentProvider]:
-        return self.provider_manager.get(provider_name)
+    def get_provider(self, name: str) -> Optional[TorrentProvider]:
+        return self.provider_manager.get(name)
 
-    def add_providers(self, providers: Union[str, dict]):
-        if isinstance(providers, dict):
-            logger.debug("Adding providers from dictionary")
+    def add_provider(self, provider: Union[str, dict, TorrentProvider]):
+        if isinstance(provider, TorrentProvider):
+            logger.debug("Adding provider: {}".format(provider.name))
+            self.provider_manager.add(provider)
+        elif isinstance(provider, dict):
+            logger.debug("Adding provider from dictionary")
             try:
-                self.provider_manager.add_from_dict(providers)
+                self.provider_manager.add_from_dict(provider)
             except Exception as e:
-                message = "Failed to add providers from dictionary: {}" \
-                        .format(str(e))
+                message = "Failed to add provider from dictionary: {}" \
+                          .format(str(e))
                 raise TorrentSearchEngineError(message) from None
         else:
-            # providers can be url or path
-            if providers.startswith("http"):
+            # provider can be url or path
+            if provider.startswith("http"):
                 # url
-                logger.debug("Adding providers from url: '{}'".format(providers))
+                logger.debug("Adding provider from url: '{}'".format(provider))
                 try:
-                    self.provider_manager.add_from_url(providers)
+                    self.provider_manager.add_from_url(provider)
                 except Exception as e:
-                    message = "Failed to add providers from url '{}': {}" \
-                            .format(providers, str(e))
+                    message = "Failed to add provider from url '{}': {}" \
+                            .format(provider, str(e))
                     raise TorrentSearchEngineError(message) from None
             else:
                 # path
-                logger.debug("Adding providers from file: '{}'".format(providers))
+                logger.debug("Adding provider from file: '{}'".format(provider))
                 try:
-                    self.provider_manager.add_from_file(providers)
+                    self.provider_manager.add_from_file(provider)
                 except Exception as e:
                     message = "Failed to add providers from file '{}': {}" \
-                            .format(providers, str(e))
+                              .format(provider, str(e))
                     raise TorrentSearchEngineError(message) from None
 
     def disable_providers(self, *providers: List[Union[str, TorrentProvider]]):
@@ -96,30 +102,42 @@ class TorrentSearchEngine:
         logger.debug("Removing providers: {}".format(providers))
         self.provider_manager.remove(*providers)
 
-    def _multithreaded_search(self, providers: List[TorrentProvider],
-                              query: str, limit: int, n_workers: int):
+    def _multithreaded_search(self, providers: List[TorrentProvider], query: str,
+                              limit: int, timeout: int, n_threads: int):
 
-        def job(provider: TorrentProvider, query: str, limit: int):
+        def task(q, provider, query, limit, timeout):
             logger.debug("Search on provider {} running on thread: {} ({})"
-                         .format(provider.name,
-                                 current_thread().name,
-                                 current_thread().ident))
-            torrents = []
+                        .format(provider.name,
+                                current_thread().name,
+                                current_thread().ident))
+            elapsed_time = time.time() - start_time
+            print("Thread Elapsed: "+str(elapsed_time))
+            timeout = timeout - elapsed_time
+            if timeout <= 0.01:
+                return
             try:
-                torrents = provider.search(query, limit)
+                for torrent in provider.search(query, limit, timeout):
+                    q.put_nowait(torrent)
             except TorrentProviderError as e:
-                # save errors in the list
-                self.errors.append(e)
-            return torrents
+                message = "Search on provider %s failed: %s"
+                logger.warning(message, provider.name, str(e))
+            except queue.Full:
+                pass
 
-        executor = ThreadPoolExecutor(n_workers)
+        start_time = time.time()
+        torrents = []
+        q = queue.Queue(limit)
+        with concurrent.futures.ThreadPoolExecutor(max_workers=n_threads) as executor:
+            n = len(providers)
+            args = [[q]*n, providers, [query]*n, [limit]*n, [timeout]*n]
+            for result in executor.map(task, *args):
+                pass
+        while not q.empty():
+            torrents.append(q.get_nowait())
 
-        args = [providers, [query]*len(providers), [limit]*len(providers)]
+        return torrents
 
-        results = executor.map(job, *args)
-        results = [item for sublist in results for item in sublist]
 
-        return results
 
     def _filter(self, items: List[Torrent]):
         # find duplicats and keep only the one with more seeds

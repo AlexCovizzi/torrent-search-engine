@@ -12,27 +12,25 @@ logger = logging.getLogger(__name__)
 
 class TorrentProvider(ABC):
 
-    def __init__(self, name: str, url: str, enabled=True):
+    def __init__(self, name: str, fullname: str, url: str, enabled=True):
         self.name = name
+        self.fullname = fullname
         self.url = url
         self.enabled = enabled
 
     @abstractmethod
-    def search(self, query: str, limit: int = 25) -> List[Torrent]:
+    def search(self, query: str, limit: int = 25, timeout=30):
         """
         Search torrents using this provider.
 
         Parameters:
             query: str - The query to perform.
             limit: int - The number of results to return.
-
-        Returns:
-            List[Torrent] - A List of Torrents.
         """
         pass
 
     @abstractmethod
-    def fetch_magnet(self, torrent: Torrent) -> str:
+    def fetch_magnet(self, torrent: Torrent, timeout=30) -> str:
         """
         Fetch the magnet for this torrent.
 
@@ -73,6 +71,7 @@ class TorrentProvider(ABC):
     def asdict(self) -> dict:
         return {
             "name": self.name,
+            "fullname": self.fullname,
             "url": self.url,
             "enabled": self.enabled
         }

@@ -19,24 +19,22 @@ class TorrentProviderManager:
         for provider in providers:
             self._add(provider)
 
-    def add_from_dict(self, pdict):
-        torrent_provider_validator.validate(pdict)
-
-        for key, value in pdict.items():
-            provider = WebsiteTorrentProvider(key, **value)
-            self._add(provider)
+    def add_from_dict(self, provider_dict):
+        torrent_provider_validator.validate(provider_dict)
+        provider = WebsiteTorrentProvider(**provider_dict)
+        self._add(provider)
 
     def add_from_file(self, path: str):
         with open(path, 'r', encoding='utf-8') as f:
-            pdict = json.load(f)
+            provider_dict = json.load(f)
 
-        self.add_from_dict(pdict)
+        self.add_from_dict(provider_dict)
 
     def add_from_url(self, url: str):
         response = requests.get(url)
         response.raise_for_status()
-        pdict = json.loads(response.text)
-        self.add_from_dict(pdict)
+        provider_dict = json.loads(response.text)
+        self.add_from_dict(provider_dict)
 
     def get(self, name: str) -> Optional[TorrentProvider]:
         return self.providers.get(name, None)

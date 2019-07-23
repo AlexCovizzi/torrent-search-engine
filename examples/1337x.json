@@ -1,0 +1,21 @@
+{
+    "name": "1337x.am",
+    "fullname": "1337x",
+    "url": "https://www.1337x.am",
+    "search": "/search/{query}/1/",
+    "list": {
+        "items": "table.table-list > tbody > tr",
+        "item": {
+            "title":"td.name > a:nth-of-type(2) @ text",
+            "url":"td.name > a:nth-of-type(2) @ href",
+            "size": "td.size @ text | re: [0-9\\.]+\\s+[A-Z]+",
+            "time": "td:nth-of-type(5) @ text",
+            "seeds": "td.seeds @ text",
+            "leechers": "td.leeches @ text"
+        },
+        "next": ".pagination > ul > li.active + li > a @ href"
+    },
+    "item": {
+        "magnet": "a:contains(Magnet) @ href"
+    }
+}

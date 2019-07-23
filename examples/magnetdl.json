@@ -1,0 +1,23 @@
+{
+    "name": "magnetdl.com",
+    "fullname": "magnetdl",
+    "url": "https://www.magnetdl.com",
+    "search": "/{query[0]}/{query}/se/desc/",
+    "whitespace": "-",
+    "headers": {
+        "Accept": "*/*;"
+    },
+    "list": {
+        "items": "table.download > tbody > tr:has(> td.n)",
+        "item": {
+            "title":"td.n > a @ text",
+            "url":"td.n > a @ href",
+            "size": "td:nth-of-type(6) @ text",
+            "time": "td:nth-of-type(3) @ text",
+            "seeds": "td.s @ text",
+            "leechers": "td.l @ text",
+            "magnet": "td.m > a @ href"
+        },
+        "next": "#pages > a:contains(Next) @ href"
+    }
+}

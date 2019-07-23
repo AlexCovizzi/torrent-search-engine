@@ -2,6 +2,7 @@ from typing import Any, List
 import re
 import requests
 import logging
+import time
 from torrentsearchengine.utils import KwArgs, urljoin, urlfix
 from torrentsearchengine.exceptions import *
 from torrentsearchengine.provider import TorrentProvider
@@ -15,9 +16,11 @@ logger = logging.getLogger(__name__)
 
 class WebsiteTorrentProvider(TorrentProvider):
 
-    def __init__(self, name: str, **kwargs: dict):
+    def __init__(self, **kwargs: dict):
         kwargs = KwArgs(kwargs)
 
+        name = kwargs.getstr('name')
+        fullname = kwargs.getstr('fullname', name)
         url = kwargs.getstr('url')
 
         list_section = KwArgs(kwargs.getdict('list'))
@@ -37,15 +40,15 @@ class WebsiteTorrentProvider(TorrentProvider):
         self.item_selectors = {key: Selector.parse(str(s))
                                for key, s in item_section.items()}
 
-        super(WebsiteTorrentProvider, self).__init__(name, url)
+        super(WebsiteTorrentProvider, self).__init__(name, fullname, url, True)
 
-        logger.debug("{}: created:\n{}".format(name, self.asdict()))
-
-    def search(self, query: str, limit: int = 0) -> List[Torrent]:
+    def search(self, query: str, limit: int = 0, timeout=30):
         if not self.enabled:
-            return []
+            return
 
-        torrents = []
+        start_time = time.time()
+        elapsed_time = 0
+
         remaining = limit
 
         # format query for url
@@ -57,7 +60,9 @@ class WebsiteTorrentProvider(TorrentProvider):
 
         while path and (limit == 0 or remaining > 0):
             try:
-                response = self.fetch(path, headers=self.headers)
+                elapsed_time = time.time() - start_time
+                current_timeout = timeout - elapsed_time
+                response = self.fetch(path, headers=self.headers, timeout=current_timeout)
             except TorrentProviderRequestError as e:
                 raise TorrentProviderSearchError(self, query, e.request) from e
 
@@ -80,7 +85,7 @@ class WebsiteTorrentProvider(TorrentProvider):
                     props['url'] = url
 
                 torrent = Torrent(**props)
-                torrents.append(torrent)
+                yield torrent
 
             remaining -= len(items)
 
@@ -89,9 +94,7 @@ class WebsiteTorrentProvider(TorrentProvider):
                           .re(self.next_page_url_selector.re,
                               self.next_page_url_selector.fmt)
 
-        return torrents
-
-    def fetch_magnet(self, torrent: Torrent) -> str:
+    def fetch_magnet(self, torrent: Torrent, timeout=30) -> str:
         if torrent._magnet:
             return torrent._magnet
 
@@ -106,7 +109,7 @@ class WebsiteTorrentProvider(TorrentProvider):
             return ''
 
         # fetch the torrent info page and scrape
-        response = self.fetch(path)
+        response = self.fetch(path, timeout=timeout)
 
         scraper = Scraper(response.text)
 
@@ -117,7 +120,7 @@ class WebsiteTorrentProvider(TorrentProvider):
         torrent._magnet = magnet
 
         return magnet
-
+    """
     def asdict(self) -> dict:
         return {
             "name": self.name,
@@ -134,3 +137,4 @@ class WebsiteTorrentProvider(TorrentProvider):
             "item": {key: selector.asdict() for key, selector
                      in self.item_selectors.items()}
         }
+    """

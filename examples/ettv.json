@@ -1,0 +1,21 @@
+{
+    "name": "ettv.to",
+    "fullname": "ettv",
+    "url": "https://www.ettv.to",
+    "search": "/torrents-search.php?search={query}",
+    "list": {
+        "items": "table > tr",
+        "next": "div.myFrame-content > div > p > a:contains(Next) @ href",
+        "item": {
+            "title": "td:nth-of-type(2) > a > b @ text",
+            "url": "td:nth-of-type(2) > a @ href",
+            "time": "td:nth-of-type(3) @ text",
+            "size": "td:nth-of-type(4) @ text",
+            "seeds": "td:nth-of-type(6) > font > b @ text | re: ([0-9]+),([0-9]+) | fmt: \\1\\2 ",
+            "leechers": "td:nth-of-type(7) > font > b @ text"
+        }
+    },
+    "item": {
+        "magnet": "a.download_link @ href"
+    }
+}

@@ -1,0 +1,18 @@
+{
+    "name": "eztv.yt",
+    "fullname": "EZTV",
+    "url": "https://eztv.yt",
+    "search": "/search/{query}",
+    "list": {
+        "items": "tr.forum_header_border",
+        "item": {
+            "title":"td.forum_thread_post:nth-of-type(2) > a.epinfo @ text",
+            "url":"td.forum_thread_post:nth-of-type(1) > a @ href",
+            "size": "td:nth-of-type(4) @ text",
+            "time": "td:nth-of-type(5) @ text",
+            "seeds": "td.forum_thread_post_end > font @ text",
+            "leechers": "",
+            "magnet": "td.forum_thread_post:nth-of-type(3) > a.magnet @ href"
+        }
+    }
+}
