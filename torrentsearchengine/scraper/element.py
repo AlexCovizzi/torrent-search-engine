@@ -1,6 +1,6 @@
 from typing import Union, Any, Optional, List
 from bs4 import BeautifulSoup, Tag
-from .selector import Selector
+from .selector import Selector, NullSelector
 from .attribute import Attribute, NullAttribute
 
 
@@ -9,8 +9,7 @@ class Element:
     def __init__(self, parser: Optional[Tag] = None):
         self.parser = parser
 
-    def select(self, selector: Union[Selector, str]="",
-               limit: int = 0) -> List["Element"]:
+    def select(self, selector: Union[Selector, str], limit: int = 0):
         if not self.parser or not selector:
             return []
 
@@ -22,12 +21,19 @@ class Element:
         except ValueError:
             tags = []
 
-        elements = [Element(tag) for tag in tags]
+        rets = [Element(tag) for tag in tags]
 
-        return elements
+        for i in range(len(rets)):
+            if selector.has_attr():
+                rets[i] = rets[i].attr(selector.attr)
+                if selector.has_re():
+                    rets[i] = rets[i].re(selector.re, selector.fmt)
 
-    def select_one(self, selector: Union[Selector, str]="") -> "Element":
-        if not self.parser or not selector:
+        return rets
+
+    def select_one(self, selector: Union[Selector, str]):
+        if not self.parser or not selector \
+           or isinstance(selector, NullSelector):
             return NullElement()
 
         if isinstance(selector, str):
@@ -35,12 +41,19 @@ class Element:
 
         try:
             tag = self.parser.select_one(selector.css)
-        except ValueError:
+        except (ValueError, SyntaxError):
             tag = None
 
-        element = Element(tag) if tag else NullElement()
+        ret = Element(tag) if tag else NullElement()
 
-        return element
+        if selector.has_attr():
+            ret = ret.attr(selector.attr)
+            if selector.has_re():
+                ret = ret.re(selector.re, selector.fmt)
+            else:
+                ret = ret.to_string()
+
+        return ret
 
     def attr(self, attr: str = 'text') -> Attribute:
         if not self.parser:

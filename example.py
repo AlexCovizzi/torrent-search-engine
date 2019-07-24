@@ -7,15 +7,15 @@ logging.getLogger().setLevel(logging.DEBUG)
 
 engine = TorrentSearchEngine()
 engine.add_provider('examples/eztv.json')
-engine.add_provider('examples/ettv.json')
-engine.add_provider('examples/1337x.json')
+# engine.add_provider('examples/ettv.json')
+# engine.add_provider('examples/1337x.json')
+# engine.disable_providers("magnetdl")
 
-#engine.disable_providers("magnetdl")
-
-results = engine.search('doom patrol', 50, n_threads=1, timeout=1.5)
+results = engine.search('doom patrol', 1, n_threads=1, timeout=5)
 print(len(results))
-for result in results:
-    #print(str(result.title.encode("utf-8")) + ", "+result.provider.name)
+
+for result in [r.fetch_details() for r in results]:
+    print(result)
     pass
 """
 import requests

@@ -1,16 +1,15 @@
 from typing import List
-from abc import ABC, abstractmethod
 import requests
 import logging
-from torrentsearchengine.utils import urljoin, urlfix
-from torrentsearchengine.exceptions import TorrentProviderRequestError
-from torrentsearchengine.torrent import Torrent
+from .utils import urljoin, urlfix
+from .exceptions import TorrentProviderRequestError
+from .torrent import Torrent
 
 
 logger = logging.getLogger(__name__)
 
 
-class TorrentProvider(ABC):
+class TorrentProvider:
 
     def __init__(self, name: str, fullname: str, url: str, enabled=True):
         self.name = name
@@ -18,7 +17,6 @@ class TorrentProvider(ABC):
         self.url = url
         self.enabled = enabled
 
-    @abstractmethod
     def search(self, query: str, limit: int = 25, timeout=30):
         """
         Search torrents using this provider.
@@ -29,18 +27,7 @@ class TorrentProvider(ABC):
         """
         pass
 
-    @abstractmethod
-    def fetch_magnet(self, torrent: Torrent, timeout=30) -> str:
-        """
-        Fetch the magnet for this torrent.
-
-        Parameters:
-            torrent: Torrent - The torrent of which to fetch the magnet uri.
-
-        Returns:
-            str - The torrent magnet uri or an empty
-                  string if the magnet is not found.
-        """
+    def fetch_details(self, torrent: Torrent, timeout=30) -> dict:
         pass
 
     def fetch(self, url: str, **kwargs) -> requests.Response:

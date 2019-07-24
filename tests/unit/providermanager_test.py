@@ -12,6 +12,9 @@ class FakeTorrentProvider(TorrentProvider):
     def fetch_magnet(self, torrent):
         return ""
 
+    def fetch_details(self, torrent):
+        pass
+
 
 def test_add_should_add_the_provider_passed_as_argument():
     provider_manager = TorrentProviderManager()

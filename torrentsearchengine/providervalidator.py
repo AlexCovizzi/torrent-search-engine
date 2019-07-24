@@ -1,4 +1,5 @@
-from torrentsearchengine.utils import JsonValidator
+from jsonschema import Draft4Validator, validators, ValidationError
+
 
 TORRENT_PROVIDER_SCHEMA = {
     "type": "object",
@@ -46,7 +47,7 @@ TORRENT_PROVIDER_SCHEMA = {
                 },
                 "item": {
                     "type": "object",
-                    "required": ["title"],
+                    "required": ["name"],
                     "patternProperties": {
                         "[a-zA-Z]+": {
                             "type": "string"
@@ -65,5 +66,24 @@ TORRENT_PROVIDER_SCHEMA = {
         }
     }
 }
+
+
+def extend_with_default(validator_class):
+    validate_props = validator_class.VALIDATORS["properties"]
+
+    def set_defaults(validator, properties, instance, schema):
+        for prop, subschema in properties.items():
+            if "default" in subschema:
+                instance.setdefault(prop, subschema["default"])
+
+        for err in validate_props(validator, properties, instance, schema):
+            yield err
+
+    return validators.extend(
+        validator_class, {"properties": set_defaults},
+    )
+
+
+JsonValidator = extend_with_default(Draft4Validator)
 
 torrent_provider_validator = JsonValidator(TORRENT_PROVIDER_SCHEMA)

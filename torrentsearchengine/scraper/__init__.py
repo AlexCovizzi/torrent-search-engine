@@ -4,10 +4,9 @@ from .element import Element, NullElement
 
 class Scraper(Element):
 
-    def __init__(self, markup: str = '', encoding: str = None):
+    def __init__(self, markup: str = '', enc: str = None):
         try:
-            parser = BeautifulSoup(markup, 'html.parser',
-                                   from_encoding=encoding)
+            parser = BeautifulSoup(markup, 'html.parser', from_encoding=enc)
         except ValueError:
             parser = NullElement()
 

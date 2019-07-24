@@ -15,6 +15,15 @@ class Selector:
         return {"css": self.css, "attr": self.attr, "re": self.re,
                 "fmt": self.fmt}
 
+    def has_attr(self) -> bool:
+        return self.attr is not None
+
+    def has_re(self) -> bool:
+        return self.re is not None
+
+    def has_fmt(self) -> bool:
+        return self.fmt is not None
+
     def __str__(self):
         return str(self.asdict())
 
