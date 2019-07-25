@@ -65,7 +65,7 @@ And this is the json file:
     },
     // since the magnet is in the torrent page we need to define this property
     "item": {
-        "magnet": "div.magnet-section > a @ href"
+        "link": "div.magnet-section > a @ href"
     }
 }
 ```

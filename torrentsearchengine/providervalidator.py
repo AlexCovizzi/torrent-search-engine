@@ -18,7 +18,8 @@ TORRENT_PROVIDER_SCHEMA = {
             "type": "string"
         },
         "url": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^https?://"
         },
         "search": {
             "type": "string"

@@ -4,6 +4,13 @@ from .torrentbase import TorrentBase
 # TorrentDetails has the same data as TorrentBase and some more data
 class TorrentDetails(TorrentBase):
 
+    def __init__(self, **kwargs):
+        # link is required
+        if not kwargs.get("link"):
+            raise ValueError("link is required")
+
+        super().__init__(**kwargs)
+
     @property
     def time(self):
         return self.data.get("time", "")

@@ -15,6 +15,12 @@ class TorrentBase:
             seeds: int - The number of seeders.
             leeches: int - The number of leeches.
         """
+        # provider and name are required
+        if not kwargs.get("provider"):
+            raise ValueError("Provider is required")
+        if not kwargs.get("name"):
+            raise ValueError("name is required")
+
         self.data = kwargs
         self.id = simple_hash(str(self.provider) + ";" + self.name)
 

@@ -1,8 +1,8 @@
 from typing import List
 import requests
 import logging
+from .exceptions import *
 from .utils import urljoin, urlfix
-from .exceptions import TorrentProviderRequestError
 from .torrent import Torrent
 
 
@@ -24,26 +24,60 @@ class TorrentProvider:
         Parameters:
             query: str - The query to perform.
             limit: int - The number of results to return.
+            timeout: int - The max number of seconds to wait.
+                           If the search lasts longer than timeout,
+                           the search is stopped without errors.
+
+        Yields:
+            Torrent - The search results are yielded as they are retrieved.
+
+        Raises:
+            ParseError - Something went wrong parsing the page received.
+            RequestError - Something went wrong requesting the search page.
+            Timeout - The search lasted longer than timeout.
         """
         pass
 
-    def fetch_details(self, torrent: Torrent, timeout=30) -> dict:
+    def fetch_details_data(self, torrent: Torrent, timeout=30) -> dict:
+        """
+        Fetch torrent details data (e.g link, description, files, ecc)
+        from the Torrent's info_url.
+
+        Parameters:
+            torrent: Torrent - The torrent that we want the details of.
+            timeout: int - Timeout in seconds.
+
+        Returns:
+            dict - Torrent details.
+
+        Raises:
+            ParseError - Something went wrong parsing the page received.
+            RequestError - Something went wrong requesting the search page.
+            Timeout - The search lasted longer than timeout.
+        """
         pass
 
     def fetch(self, url: str, **kwargs) -> requests.Response:
+        """
+        Retrieve a page.
+
+        Raises:
+            RequestError - Something went wrong.
+            Timeout - Request timed out.
+        """
         if not url.startswith('http'):
             url = urljoin(self.url, url)
         url = urlfix(url)
 
+        logger.debug("{}: GET {}".format(self.name, url))
+
         try:
             response = requests.get(url, **kwargs)
             response.raise_for_status()
-        except requests.exceptions.ConnectionError as e:
-            message = "Failed to connect to {}: {}".format(url, e)
-            raise TorrentProviderRequestError(self, message, e.request) from e
+        except requests.exceptions.Timeout as e:
+            raise Timeout(e) from e
         except requests.exceptions.RequestException as e:
-            message = "An error occurred while fetching {}: {}".format(url, e)
-            raise TorrentProviderRequestError(self, message, e.request) from e
+            raise RequestError(e) from e
 
         return response
 

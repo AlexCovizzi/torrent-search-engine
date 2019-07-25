@@ -1,6 +1,7 @@
-from unittest.mock import patch, Mock
+import pytest
+import os
 import requests
-from torrentsearchengine import TorrentProvider
+from torrentsearchengine import TorrentProvider, ValidationError, RequestError
 from torrentsearchengine.providermanager import TorrentProviderManager
 
 
@@ -28,6 +29,41 @@ def test_add_should_add_the_provider_passed_as_argument():
 
     assert returned_provider1 == provider1
     assert returned_provider2 == provider2
+
+
+def test_add_raises_IOError_if_the_path_is_not_a_file():
+    provider_manager = TorrentProviderManager()
+    with pytest.raises(IOError):
+        provider_manager.add(os.path.join(__file__, "nope.json"))
+
+
+def test_add_raises_ValidationError_if_the_path_is_not_a_json(tmpdir):
+    path = tmpdir.join("fake.json")
+    path.write("{\"value\": {}, } }")
+    provider_manager = TorrentProviderManager()
+    with pytest.raises(ValidationError):
+        provider_manager.add(str(path))
+
+
+def test_add_raises_ValidationError_if_the_path_is_not_a_valid_json(tmpdir):
+    path = tmpdir.join("invalid.json")
+    path.write("""
+    {
+        "name": "nm",
+        "fullname": "hello",
+        "search": 1234
+    }
+    """)
+    provider_manager = TorrentProviderManager()
+    with pytest.raises(ValidationError):
+        provider_manager.add(str(path))
+
+
+def test_add_raises_RequestError_if_the_url_is_not_valid():
+    url = "http://localhost:12000/nope"
+    provider_manager = TorrentProviderManager()
+    with pytest.raises(RequestError):
+        provider_manager.add(url)
 
 
 def test_disable_should_disable_the_provider_passed_as_argument():

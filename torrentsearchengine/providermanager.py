@@ -2,6 +2,7 @@ from typing import List, Union, Optional
 import json
 import logging
 import requests
+import jsonschema
 from .exceptions import *
 from .providervalidator import torrent_provider_validator
 from .provider import TorrentProvider
@@ -17,37 +18,27 @@ class TorrentProviderManager:
         self.providers = {}
 
     def add(self, provider: Union[str, dict, TorrentProvider]):
+        """
+        Add a provider from dict/file/url.
+
+        Raises:
+            ValueError - There is an error in a property.
+            ValidationError - The resource is incorrect.
+            RequestError - The resource could not be retrieve from url.
+            IOError - The file could not be read.
+        """
         if isinstance(provider, TorrentProvider):
             logger.debug("Adding provider: {}".format(provider.name))
             self._add(provider)
         elif isinstance(provider, dict):
             logger.debug("Adding provider from dictionary")
-            try:
-                self._add_from_dict(provider)
-            except Exception as e:
-                message = "Failed to add provider from dictionary: {}" \
-                          .format(str(e))
-                raise TorrentSearchEngineError(message) from None
+            self._add_from_dict(provider)
+        elif provider.startswith("http"):
+            logger.debug("Adding provider from url: {}".format(provider))
+            self._add_from_url(provider)
         else:
-            # provider can be url or path
-            if provider.startswith("http"):
-                # url
-                logger.debug("Adding provider from url: {}".format(provider))
-                try:
-                    self._add_from_url(provider)
-                except Exception as e:
-                    message = "Failed to add provider from url {}: {}" \
-                            .format(provider, str(e))
-                    raise TorrentSearchEngineError(message) from None
-            else:
-                # path
-                logger.debug("Adding provider from file: {}".format(provider))
-                try:
-                    self._add_from_file(provider)
-                except Exception as e:
-                    message = "Failed to add providers from file '{}': {}" \
-                              .format(provider, str(e))
-                    raise TorrentSearchEngineError(message) from None
+            logger.debug("Adding provider from file: {}".format(provider))
+            self._add_from_file(provider)
 
     def get(self, name: str) -> Optional[TorrentProvider]:
         return self.providers.get(name, None)
@@ -86,20 +77,34 @@ class TorrentProviderManager:
         logger.debug("Added provider: {}".format(provider))
 
     def _add_from_dict(self, provider_dict: dict):
-        torrent_provider_validator.validate(provider_dict)
+        try:
+            torrent_provider_validator.validate(provider_dict)
+        except jsonschema.ValidationError as e:
+            raise ValidationError(e) from e
+        except jsonschema.ValidationError as e:
+            raise ValidationError(e) from e
         provider = WebsiteTorrentProvider(**provider_dict)
         self._add(provider)
 
     def _add_from_file(self, path: str):
-        with open(path, 'r', encoding='utf-8') as f:
-            provider_dict = json.load(f)
+        try:
+            with open(path, 'r', encoding='utf-8') as f:
+                provider_dict = json.load(f)
+        except json.JSONDecodeError as e:
+            raise ValidationError(e) from e
 
         self._add_from_dict(provider_dict)
 
     def _add_from_url(self, url: str):
-        response = requests.get(url)
-        response.raise_for_status()
-        provider_dict = json.loads(response.text)
+        try:
+            response = requests.get(url)
+            response.raise_for_status()
+            provider_dict = json.loads(response.text)
+        except requests.RequestException as e:
+            raise RequestError(e) from e
+        except json.JSONDecodeError as e:
+            raise ValidationError(e) from e
+
         self._add_from_dict(provider_dict)
 
     def _remove(self, provider: Union[str, TorrentProvider]):

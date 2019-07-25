@@ -11,11 +11,11 @@ engine.add_provider('examples/eztv.json')
 # engine.add_provider('examples/1337x.json')
 # engine.disable_providers("magnetdl")
 
-results = engine.search('doom patrol', 1, n_threads=1, timeout=5)
+results = engine.search('breaking bad s04e06', 1, n_threads=1, timeout=5)
 print(len(results))
 
 for result in [r.fetch_details() for r in results]:
-    print(result)
+    print(result.asdict()["description"])
     pass
 """
 import requests

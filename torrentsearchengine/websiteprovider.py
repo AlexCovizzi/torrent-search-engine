@@ -50,21 +50,26 @@ class WebsiteTorrentProvider(TorrentProvider):
         path = self._format_search_path(self.search_path, query)
 
         while path and (limit == 0 or remaining > 0):
-            try:
-                elapsed_time = time.time() - start_time
-                current_timeout = timeout - elapsed_time
-                response = self.fetch(path, headers=self.headers,
-                                      timeout=current_timeout)
-            except TorrentProviderRequestError as e:
-                raise TorrentProviderSearchError(self, query, e.request) from e
+            elapsed_time = time.time() - start_time
+            current_timeout = timeout - elapsed_time
+            response = self.fetch(path, headers=self.headers,
+                                  timeout=current_timeout)
 
-            scraper = Scraper(response.text)
+            try:
+                scraper = Scraper(response.text)
+            except ValueError as e:
+                raise ParseError(e) from e
 
             items = scraper.select(self.items_selector.css, limit=remaining)
             for item in items:
                 torrent_data = self._get_torrent_data(item)
-                torrent = Torrent(**torrent_data)
-                yield torrent
+                try:
+                    torrent = Torrent(**torrent_data)
+                    yield torrent
+                except ValueError:
+                    # the torrent is missing some important properties
+                    # in this case we dont return the torrent
+                    pass
 
             remaining -= len(items)
 
@@ -79,7 +84,10 @@ class WebsiteTorrentProvider(TorrentProvider):
 
         # fetch the torrent info page and scrape
         response = self.fetch(path, timeout=timeout)
-        scraper = Scraper(response.text)
+        try:
+            scraper = Scraper(response.text)
+        except ValueError as e:
+            raise ParseError(e) from e
 
         details_data = self._get_torrent_details_data(scraper)
 

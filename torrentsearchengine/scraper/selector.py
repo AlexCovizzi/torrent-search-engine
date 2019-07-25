@@ -30,7 +30,7 @@ class Selector:
     @staticmethod
     def parse(selector: str) -> "Selector":
         """
-        Selector format is: <css selector>@<attribute> | re: <matcher> | fmt: <formatter>
+        <css selector>@<attribute> | re: <matcher> | fmt: <formatter>
         """
         parts = [""]
         in_brackets = 0

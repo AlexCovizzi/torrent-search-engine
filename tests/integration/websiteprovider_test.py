@@ -1,8 +1,8 @@
-from unittest.mock import patch, Mock
+import pytest
 import requests
 import os
-from helpers.http_server import HTTPServer
-from torrentsearchengine.websiteprovider import WebsiteTorrentProvider
+from helpers.httpserver import httpserver
+from torrentsearchengine import *
 
 """
 @patch('requests.get')
@@ -12,7 +12,9 @@ def test_get(requests_get_mock: Mock):
 """
 
 
-def test_server():
-    server = HTTPServer().serve("127.0.0.1", 8000, content="Funziona")
-    assert requests.get('http://127.0.0.1:8000').text == "Funziona"
-    server.shutdown()
+def test_fetch_raises_TimeoutError():
+    content = "<html></html>"
+    with httpserver("127.0.0.1", 8000, content=content, timeout=2):
+        provider = TorrentProvider("name", "fullname", "http://127.0.0.1:8000")
+        with pytest.raises(Timeout):
+            provider.fetch("/", timeout=1)
