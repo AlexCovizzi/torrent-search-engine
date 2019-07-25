@@ -7,12 +7,15 @@
         "items": "tr.forum_header_border",
         "item": {
             "name":"td.forum_thread_post:nth-of-type(2) > a.epinfo @ text",
-            "info_url":"td.forum_thread_post:nth-of-type(1) > a @ href",
+            "info_url":"td.forum_thread_post:nth-of-type(2) > a @ href",
             "size": "td:nth-of-type(4) @ text",
             "time": "td:nth-of-type(5) @ text",
             "seeds": "td.forum_thread_post_end > font @ text",
             "leeches": "",
             "link": "td.forum_thread_post:nth-of-type(3) > a.magnet @ href"
         }
+    },
+    "item": {
+        "time": "table.episode_columns_holder > tr > td:nth-of-type(3) > table > tr:nth-of-type(2) > td > table > tr:nth-of-type(1) > td @ text | re: (?:.|\\s)*Released: ([a-zA-Z0-9 ]+)(?:.|\\s)* | fmt: \\1"
     }
 }

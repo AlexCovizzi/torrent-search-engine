@@ -70,7 +70,7 @@ class WebsiteTorrentProvider(TorrentProvider):
 
             path = scraper.select_one(self.next_page_selector)
 
-    def fetch_details(self, torrent: Torrent, timeout=30) -> dict:
+    def fetch_details_data(self, torrent: Torrent, timeout=30) -> dict:
         # retrieve the info page url
         path = torrent.info_url
         if not path:
@@ -81,9 +81,9 @@ class WebsiteTorrentProvider(TorrentProvider):
         response = self.fetch(path, timeout=timeout)
         scraper = Scraper(response.text)
 
-        torrent_details = self._get_torrent_details(scraper)
+        details_data = self._get_torrent_details_data(scraper)
 
-        return torrent_details
+        return details_data
 
     def _format_search_path(self, path, query):
         query = query.strip()
@@ -100,14 +100,14 @@ class WebsiteTorrentProvider(TorrentProvider):
 
         # make the url full (with the host)
         url = props.get('info_url', '')
-        if not url.startswith('http'):
+        if url and not url.startswith('http'):
             url = urljoin(self.url, url)
             url = urlfix(url)
             props['info_url'] = url
 
         return props
 
-    def _get_torrent_details(self, element):
+    def _get_torrent_details_data(self, element):
         props = {}
         # retrieve the info page selectors
         for key, selector in self.item_selectors.items():

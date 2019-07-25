@@ -30,9 +30,23 @@ class Selector:
     @staticmethod
     def parse(selector: str) -> "Selector":
         """
-        Selector format is: <css selector>@<attribute> | re:<formatter>
+        Selector format is: <css selector>@<attribute> | re: <matcher> | fmt: <formatter>
         """
-        parts = selector.split('|')
+        parts = [""]
+        in_brackets = 0
+        last_char = None
+        for char in selector:
+            if char == '|' and last_char != '\\' and in_brackets == 0:
+                parts.append('')
+                continue
+            if char == '(' and last_char != '\\':
+                in_brackets += 1
+            elif char == ')' and last_char != '\\':
+                in_brackets -= 1
+            last_char = char
+            parts[-1] += char
+
+        # parts = selector.split('|')
         parts = [part.strip() for part in parts]
 
         attr_selector = parts[0] if len(parts) > 0 else ''
