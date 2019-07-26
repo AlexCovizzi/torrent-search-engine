@@ -9,7 +9,7 @@ class Element:
     def __init__(self, parser: Optional[Tag] = None):
         self.parser = parser
 
-    def select(self, selector: Union[Selector, str], limit: int = 0):
+    def select_elements(self, selector: Union[Selector, str], limit: int = 0):
         if not self.parser or not selector:
             return []
 
@@ -21,17 +21,11 @@ class Element:
         except ValueError:
             tags = []
 
-        rets = [Element(tag) for tag in tags]
+        elements = [Element(tag) for tag in tags]
 
-        for i in range(len(rets)):
-            if selector.has_attr():
-                rets[i] = rets[i].attr(selector.attr)
-                if selector.has_re():
-                    rets[i] = rets[i].re(selector.re, selector.fmt)
+        return elements
 
-        return rets
-
-    def select_one(self, selector: Union[Selector, str]):
+    def select_one_element(self, selector: Union[Selector, str]):
         if not self.parser or not selector \
            or isinstance(selector, NullSelector):
             return NullElement()
@@ -44,16 +38,32 @@ class Element:
         except (ValueError, SyntaxError):
             tag = None
 
-        ret = Element(tag) if tag else NullElement()
+        element = Element(tag) if tag else NullElement()
 
-        if selector.has_attr():
-            ret = ret.attr(selector.attr)
+        return element
+
+    def select(self, selector: Union[Selector, str], limit: int = 0):
+        elements = self.select_elements(selector, limit=limit)
+
+        for i in range(len(elements)):
+            attr = selector.attr | "text"
+            elements[i] = elements[i].attr(selector.attr)
             if selector.has_re():
-                ret = ret.re(selector.re, selector.fmt)
-            else:
-                ret = ret.to_string()
+                elements[i] = elements[i].re(selector.re, selector.fmt)
 
-        return ret
+        return elements
+
+    def select_one(self, selector: Union[Selector, str]):
+        element = self.select_one_element(selector)
+
+        attr = selector.attr or "text"
+        element = element.attr(selector.attr)
+        if selector.has_re():
+            element = element.re(selector.re, selector.fmt)
+        else:
+            element = element.to_string()
+
+        return element
 
     def attr(self, attr: str = 'text') -> Attribute:
         if not self.parser:

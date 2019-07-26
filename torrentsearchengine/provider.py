@@ -11,6 +11,9 @@ logger = logging.getLogger(__name__)
 
 class TorrentProvider:
 
+    # if the time left is less than this number, we raise Timeout
+    TIMEOUT_EPSILON = 0.1
+
     def __init__(self, name: str, fullname: str, url: str, enabled=True):
         self.name = name
         self.fullname = fullname
@@ -26,7 +29,7 @@ class TorrentProvider:
             limit: int - The number of results to return.
             timeout: int - The max number of seconds to wait.
                            If the search lasts longer than timeout,
-                           the search is stopped without errors.
+                           raise Timeout.
 
         Yields:
             Torrent - The search results are yielded as they are retrieved.

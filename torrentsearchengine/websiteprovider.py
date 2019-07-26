@@ -50,8 +50,14 @@ class WebsiteTorrentProvider(TorrentProvider):
         path = self._format_search_path(self.search_path, query)
 
         while path and (limit == 0 or remaining > 0):
-            elapsed_time = time.time() - start_time
+            iter_time = time.time()
+            elapsed_time = iter_time - start_time
             current_timeout = timeout - elapsed_time
+            if current_timeout <= TorrentProvider.TIMEOUT_EPSILON:
+                message = "{} search timed out (search timeout={})" \
+                          .format(self.name, timeout)
+                raise Timeout(message)
+
             response = self.fetch(path, headers=self.headers,
                                   timeout=current_timeout)
 
@@ -60,7 +66,8 @@ class WebsiteTorrentProvider(TorrentProvider):
             except ValueError as e:
                 raise ParseError(e) from e
 
-            items = scraper.select(self.items_selector.css, limit=remaining)
+            items = scraper.select_elements(self.items_selector,
+                                            limit=remaining)
             for item in items:
                 torrent_data = self._get_torrent_data(item)
                 try:

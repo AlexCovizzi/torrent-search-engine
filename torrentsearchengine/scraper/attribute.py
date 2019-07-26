@@ -20,9 +20,12 @@ class Attribute:
             match = re.match(regex, value)
             if match:
                 value = match.group(0)
-        # otherwise we replace
+        # otherwise we match and then replace the matched string
         else:
-            value = re.sub(regex, fmt, value)
+            match = re.match(regex, value)
+            if match:
+                value = match.group(0)
+                value = re.sub(regex, fmt, value)
 
         return value
 
