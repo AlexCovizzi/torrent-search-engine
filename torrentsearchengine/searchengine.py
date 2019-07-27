@@ -9,8 +9,8 @@ from threading import current_thread
 import queue
 from .exceptions import *
 from .providermanager import TorrentProviderManager
+from .torrentprovider import TorrentProvider
 from .torrent import Torrent
-from .provider import TorrentProvider
 
 
 logger = logging.getLogger(__name__)
@@ -21,14 +21,15 @@ class TorrentSearchEngine:
     def __init__(self):
         self.provider_manager = TorrentProviderManager()
 
-    def search(self, query: str, limit: int = 0, timeout: int = 30,
-               n_threads: int = None) -> List[Torrent]:
+    def search(self, query: str, limit: int = 0, providers=None,
+               timeout: int = 30, n_threads: int = None) -> List[Torrent]:
         """
         Search torrents.
 
         Parameters:
             query: str - The query to perform.
             limit: int - The number of results to return.
+            providers: List[Union[str, TorrentProvider]] - Providers to use.
             timeout: int - The max number of seconds to wait.
 
         Returns:
@@ -41,7 +42,17 @@ class TorrentSearchEngine:
         if not query:
             return []
 
-        providers = self.get_providers(enabled=True)
+        if providers is None:
+            # get only enabled providers
+            providers = self.get_providers(enabled=True)
+        else:
+            # get as TorrentProvider
+            providers = [provider if isinstance(provider, TorrentProvider)
+                         else self.get_provider(provider)
+                         for provider in providers]
+            providers = [provider for provider in providers
+                         if provider is not None]
+
         n_providers = len(providers)
         if n_providers == 0:
             return []

@@ -50,4 +50,4 @@ class httpserver:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self._server.shutdown()
-        return False
+        self._server.server_close()

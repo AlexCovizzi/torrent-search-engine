@@ -5,22 +5,10 @@ from torrentsearchengine import TorrentProvider, ValidationError, RequestError
 from torrentsearchengine.providermanager import TorrentProviderManager
 
 
-class FakeTorrentProvider(TorrentProvider):
-
-    def search(self, query, limit):
-        return []
-
-    def fetch_magnet(self, torrent):
-        return ""
-
-    def fetch_details(self, torrent):
-        pass
-
-
 def test_add_should_add_the_provider_passed_as_argument():
     provider_manager = TorrentProviderManager()
-    provider1 = FakeTorrentProvider("name1", "name1", "url1")
-    provider2 = FakeTorrentProvider("name2", "name2", "url2")
+    provider1 = TorrentProvider(validate=False, name="name1")
+    provider2 = TorrentProvider(validate=False, name="name2")
     provider_manager.add(provider1)
     provider_manager.add(provider2)
 
@@ -68,7 +56,7 @@ def test_add_raises_RequestError_if_the_url_is_not_valid():
 
 def test_disable_should_disable_the_provider_passed_as_argument():
     provider_manager = TorrentProviderManager()
-    provider = FakeTorrentProvider("name", "name", "url", enabled=True)
+    provider = TorrentProvider(validate=False, name="name")
     provider_manager.add(provider)
 
     provider_manager.disable(provider.name)
@@ -78,7 +66,8 @@ def test_disable_should_disable_the_provider_passed_as_argument():
 
 def test_enable_should_enable_the_provider_passed_as_argument():
     provider_manager = TorrentProviderManager()
-    provider = FakeTorrentProvider("name", "name", "url", enabled=True)
+    provider = TorrentProvider(validate=False, name="name")
+    provider.disable()
     provider_manager.add(provider)
 
     provider_manager.enable(provider.name)
@@ -88,10 +77,9 @@ def test_enable_should_enable_the_provider_passed_as_argument():
 
 def test_remove_should_remove_the_provider_passed_as_argument():
     provider_manager = TorrentProviderManager()
-    provider = FakeTorrentProvider("name", "name", "url", enabled=True)
+    provider = TorrentProvider(validate=False, name="name")
     provider_manager.add(provider)
 
     provider_manager.remove(provider.name)
 
     assert not provider_manager.get(provider.name)
-

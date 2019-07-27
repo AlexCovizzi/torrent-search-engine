@@ -2,11 +2,8 @@ from typing import List, Union, Optional
 import json
 import logging
 import requests
-import jsonschema
 from .exceptions import *
-from .providervalidator import torrent_provider_validator
-from .provider import TorrentProvider
-from .websiteprovider import WebsiteTorrentProvider
+from .torrentprovider import TorrentProvider
 
 
 logger = logging.getLogger(__name__)
@@ -77,13 +74,7 @@ class TorrentProviderManager:
         logger.debug("Added provider: {}".format(provider))
 
     def _add_from_dict(self, provider_dict: dict):
-        try:
-            torrent_provider_validator.validate(provider_dict)
-        except jsonschema.ValidationError as e:
-            raise ValidationError(e) from e
-        except jsonschema.ValidationError as e:
-            raise ValidationError(e) from e
-        provider = WebsiteTorrentProvider(**provider_dict)
+        provider = TorrentProvider(validate=True, **provider_dict)
         self._add(provider)
 
     def _add_from_file(self, path: str):

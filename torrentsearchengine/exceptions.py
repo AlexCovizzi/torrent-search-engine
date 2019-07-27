@@ -13,7 +13,7 @@ class RequestError(_Error, IOError):
         super().__init__(str(message))
 
 
-class Timeout(RequestError, TimeoutError):
+class Timeout(TimeoutError):
 
     def __init__(self, message):
         super().__init__(str(message))
@@ -26,6 +26,18 @@ class ValidationError(_Error):
 
 
 class ParseError(_Error):
+
+    def __init__(self, message):
+        super().__init__(str(message))
+
+
+class FormatError(_Error):
+
+    def __init__(self, message):
+        super().__init__(str(message))
+
+
+class NotSupportedError(_Error):
 
     def __init__(self, message):
         super().__init__(str(message))

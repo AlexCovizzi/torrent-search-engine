@@ -19,10 +19,34 @@ TORRENT_PROVIDER_SCHEMA = {
         },
         "url": {
             "type": "string",
-            "pattern": "^https?://"
+            "pattern": "^https?://[\\w\\.]+\\w+/?$"
         },
         "search": {
             "type": "string"
+        },
+        "categories": {
+            "type": "object",
+            "required": ["all"],
+            "properties": {
+                "all": {
+                    "type": "string"
+                },
+                "movies": {
+                    "type": "string"
+                },
+                "tv": {
+                    "type": "string"
+                },
+                "music": {
+                    "type": "string"
+                },
+                "games": {
+                    "type": "string"
+                },
+                "apps": {
+                    "type": "string"
+                }
+            }
         },
         "whitespace": {
             "type": "string"
@@ -50,7 +74,7 @@ TORRENT_PROVIDER_SCHEMA = {
                     "type": "object",
                     "required": ["name"],
                     "patternProperties": {
-                        "[a-zA-Z]+": {
+                        "[a-z_]+": {
                             "type": "string"
                         }
                     }
@@ -59,8 +83,9 @@ TORRENT_PROVIDER_SCHEMA = {
         },
         "item": {
             "type": "object",
+            "default": {},
             "patternProperties": {
-                "[a-zA-Z]+": {
+                "[a-z_]+": {
                     "type": "string"
                 }
             }
