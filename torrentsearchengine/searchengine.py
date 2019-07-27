@@ -111,12 +111,9 @@ class TorrentSearchEngine:
                          .format(provider.name,
                                  current_thread().name,
                                  current_thread().ident))
-            elapsed_time = time.time() - start_time
-            timeout = timeout - elapsed_time
-            if timeout <= provider.TIMEOUT_EPSILON:
-                return
             try:
-                for torrent in provider.search(query, limit, timeout):
+                for torrent in provider.search(query, limit=limit,
+                                               timeout=timeout):
                     q.put_nowait(torrent)
             except (ParseError, RequestError, Timeout) as e:
                 message = "Search on provider {} stopped: {}" \

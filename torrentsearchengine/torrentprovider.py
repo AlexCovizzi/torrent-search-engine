@@ -73,7 +73,7 @@ class TorrentProvider:
 
         remaining = limit
 
-        path = self._format_search_path(query)
+        path = self._format_search_path(query, category)
 
         while path and (not limit or remaining > 0):
             if timeout is not None:
@@ -191,7 +191,7 @@ class TorrentProvider:
             raise ValidationError(e) from e
 
     def _format_search_path(self, query, category):
-        query = query.strip()
+        query = query.lower().strip()
         # replace whitespace with whitespace character
         if self.whitespace_char:
             query = re.sub(r"\s+", self.whitespace_char, query)
@@ -201,7 +201,7 @@ class TorrentProvider:
         try:
             if category_path is not None:
                 category_path = category_path.format(query=query)
-            path = path.format(category=category_path, query=query)
+            path = self.search_path.format(category=category_path, query=query)
         except KeyError as e:
             message = "{} with query = {} and category = {}" \
                       .format(self.search_path, query, category)
@@ -210,7 +210,7 @@ class TorrentProvider:
 
     def _get_category_path(self, category):
         if category is None:
-            category == "all"
+            category = "all"
         if not self.categories:
             if category == "all":
                 return None
