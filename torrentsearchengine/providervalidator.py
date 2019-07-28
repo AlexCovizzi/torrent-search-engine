@@ -22,31 +22,35 @@ TORRENT_PROVIDER_SCHEMA = {
             "pattern": "^https?://[\\w\\.]+\\w+/?$"
         },
         "search": {
-            "type": "string"
-        },
-        "categories": {
-            "type": "object",
-            "required": ["all"],
-            "properties": {
-                "all": {
+            "anyOf": [
+                {
                     "type": "string"
                 },
-                "movies": {
-                    "type": "string"
-                },
-                "tv": {
-                    "type": "string"
-                },
-                "music": {
-                    "type": "string"
-                },
-                "games": {
-                    "type": "string"
-                },
-                "apps": {
-                    "type": "string"
+                {
+                    "type": "object",
+                    "required": ["all"],
+                    "properties": {
+                        "all": {
+                            "type": "string"
+                        },
+                        "movies": {
+                            "type": "string"
+                        },
+                        "tv": {
+                            "type": "string"
+                        },
+                        "music": {
+                            "type": "string"
+                        },
+                        "games": {
+                            "type": "string"
+                        },
+                        "apps": {
+                            "type": "string"
+                        }
+                    }
                 }
-            }
+            ]
         },
         "whitespace": {
             "type": "string"

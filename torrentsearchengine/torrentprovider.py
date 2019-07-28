@@ -31,18 +31,20 @@ class TorrentProvider:
         list_item_section = list_section.get('item', {})
         item_section = kwargs.get('item', {})
 
-        self.headers = kwargs.get('headers')
-        self.search_path = kwargs.get('search')
-        self.categories = kwargs.get('categories')
-        self.whitespace_char = kwargs.get('whitespace')
+        self._headers = kwargs.get('headers')
+        self._whitespace_char = kwargs.get('whitespace')
+        self._search = kwargs.get('search')
+        # convert to dictionary
+        self._search = self._search if isinstance(self._search, dict) \
+            else {"all": self._search}
 
         # parse selectors
-        self.next_page_selector = Selector.parse(list_section.get('next', ""))
-        self.items_selector = Selector.parse(list_section.get('items', ""))
-        self.list_item_selectors = {key: Selector.parse(sel)
-                                    for key, sel in list_item_section.items()}
-        self.item_selectors = {key: Selector.parse(sel)
-                               for key, sel in item_section.items()}
+        self._next_page_selector = Selector.parse(list_section.get('next', ""))
+        self._items_selector = Selector.parse(list_section.get('items', ""))
+        self._list_item_selectors = {key: Selector.parse(sel)
+                                     for key, sel in list_item_section.items()}
+        self._item_selectors = {key: Selector.parse(sel)
+                                for key, sel in item_section.items()}
 
     def search(self, query: str, category=None, limit=None, timeout=None):
         """
@@ -79,10 +81,12 @@ class TorrentProvider:
             if timeout is not None:
                 elapsed_time = time.time() - start_time
                 current_timeout = timeout - elapsed_time
+                if current_timeout <= 0:
+                    break
             else:
                 current_timeout = None
 
-            response = self.fetch(path, headers=self.headers,
+            response = self.fetch(path, headers=self._headers,
                                   timeout=current_timeout)
 
             try:
@@ -90,7 +94,7 @@ class TorrentProvider:
             except ValueError as e:
                 raise ParseError(e) from e
 
-            items = scraper.select_elements(self.items_selector,
+            items = scraper.select_elements(self._items_selector,
                                             limit=remaining)
             for item in items:
                 torrent_data = self._get_torrent_data(item)
@@ -104,7 +108,7 @@ class TorrentProvider:
 
             remaining -= len(items)
 
-            path = scraper.select_one(self.next_page_selector)
+            path = scraper.select_one(self._next_page_selector)
 
     def fetch_details_data(self, torrent: Torrent, timeout=None) -> dict:
         """
@@ -193,42 +197,28 @@ class TorrentProvider:
     def _format_search_path(self, query, category):
         query = query.lower().strip()
         # replace whitespace with whitespace character
-        if self.whitespace_char:
-            query = re.sub(r"\s+", self.whitespace_char, query)
+        if self._whitespace_char:
+            query = re.sub(r"\s+", self._whitespace_char, query)
 
-        category_path = self._get_category_path(category)
-
-        try:
-            if category_path is not None:
-                category_path = category_path.format(query=query)
-            path = self.search_path.format(category=category_path, query=query)
-        except KeyError as e:
-            message = "{} with query = {} and category = {}" \
-                      .format(self.search_path, query, category)
-            raise FormatError(message)
-        return path
-
-    def _get_category_path(self, category):
         if category is None:
             category = "all"
-        if not self.categories:
-            if category == "all":
-                return None
-            else:
-                message = "{}: category {} is not supported." \
-                          .format(self.name, category)
-                raise NotSupportedError(message)
+        if category not in self._search:
+            message = "{}: category {} is not supported." \
+                        .format(self.name, category)
+            raise NotSupportedError(message)
         else:
-            if category in self.categories:
-                return self.categories.get(category)
-            else:
-                message = "{}: category {} is not supported." \
-                          .format(self.name, category)
-                raise NotSupportedError(message)
+            try:
+                path = self._search.get(category)
+                path = path.format(query=query)
+            except KeyError as e:
+                message = "{}: {} with query = {} and category = {}" \
+                        .format(self.name, path, query, category)
+                raise FormatError(message)
+        return path
 
     def _get_torrent_data(self, element):
         props = {"provider": self}
-        for key, selector in self.list_item_selectors.items():
+        for key, selector in self._list_item_selectors.items():
             prop = element.select_one(selector)
             props[key] = prop
 
@@ -244,7 +234,7 @@ class TorrentProvider:
     def _get_torrent_details_data(self, element):
         props = {}
         # retrieve the info page selectors
-        for key, selector in self.item_selectors.items():
+        for key, selector in self._item_selectors.items():
             # for some properties we need to select all elements that match
             if key == "files" or key == "trackers":
                 prop = element.select(selector)

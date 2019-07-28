@@ -7,11 +7,12 @@ from torrentsearchengine import *
 
 HOST = "127.0.0.1"
 PORT = 8082
+BASE_URL = "http://{}:{}".format(HOST, PORT)
 
 
 provider_dict = {
     "name": "provider",
-    "url": "https://{}:{}".format(HOST, PORT),
+    "url": BASE_URL,
     "search": "/{query}",
     "list": {
         "items": "table > tr.item",
@@ -42,20 +43,20 @@ def test_new_TorrentProvider():
 
 def test_fetch_returns_response():
     content = "<html></html>"
-    with httpserver("127.0.0.1", 8000, content=content):
-        provider = TorrentProvider(validate=False, name="name", url="http://127.0.0.1:8000")
+    with httpserver(HOST, PORT, content=content):
+        provider = TorrentProvider(validate=False, name="name", url=BASE_URL)
         assert provider.fetch("/").text == content
 
 
 def test_fetch_raises_TimeoutError():
     content = "<html></html>"
-    with httpserver("127.0.0.1", 8000, content=content, timeout=2):
-        provider = TorrentProvider(validate=False, name="name", url="http://127.0.0.1:8000")
+    with httpserver(HOST, PORT, content=content, timeout=2):
+        provider = TorrentProvider(validate=False, name="name", url=BASE_URL)
         with pytest.raises(Timeout):
             provider.fetch("/", timeout=1)
 
 
 def test_fetch_raises_RequestError():
-    provider = TorrentProvider(validate=False, name="name", url="http://127.0.0.1:8000")
+    provider = TorrentProvider(validate=False, name="name", url=BASE_URL)
     with pytest.raises(RequestError):
         provider.fetch("/")

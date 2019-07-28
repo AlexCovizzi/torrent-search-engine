@@ -21,13 +21,15 @@ class TorrentSearchEngine:
     def __init__(self):
         self.provider_manager = TorrentProviderManager()
 
-    def search(self, query: str, limit: int = 0, providers=None,
-               timeout: int = 30, n_threads: int = None) -> List[Torrent]:
+    def search(self, query: str, category: str = None, limit: int = None,
+               providers=None, timeout: int = None,
+               n_threads: int = None) -> List[Torrent]:
         """
         Search torrents.
 
         Parameters:
             query: str - The query to perform.
+            category: str - The category to search.
             limit: int - The number of results to return.
             providers: List[Union[str, TorrentProvider]] - Providers to use.
             timeout: int - The max number of seconds to wait.
@@ -35,7 +37,7 @@ class TorrentSearchEngine:
         Returns:
             List[Torrent] - The torrents found.
                             Returns an empty list if the query is empty
-                            or if no provider is enabled.
+                            or if no provider is used.
         """
 
         # an empty query simply returns no torrent (for now?)
@@ -66,7 +68,7 @@ class TorrentSearchEngine:
                       "'{}' (limit: {}, timeout: {})")
                      .format(n_providers, n_threads, query, limit, timeout))
 
-        torrents = self._multithreaded_search(providers, query,
+        torrents = self._multithreaded_search(providers, category, query,
                                               limit, timeout, n_threads)
 
         torrents = self._sort_by_seeds(torrents)
@@ -103,17 +105,25 @@ class TorrentSearchEngine:
         logger.debug("Removing providers: {}".format(providers))
         self.provider_manager.remove(*providers)
 
-    def _multithreaded_search(self, providers, query, limit,
+    def _multithreaded_search(self, providers, category, query, limit,
                               timeout, n_threads):
 
-        def task(q, provider: TorrentProvider, query, limit, timeout):
+        def task(q, provider, query, category, limit, timeout):
             logger.debug("Search on provider {} running on thread: {} ({})"
                          .format(provider.name,
                                  current_thread().name,
                                  current_thread().ident))
+            if timeout is not None:
+                elapsed_time = time.time() - start_time
+                current_timeout = timeout - elapsed_time
+                if current_timeout <= 0:
+                    return
+            else:
+                current_timeout = None
             try:
-                for torrent in provider.search(query, limit=limit,
-                                               timeout=timeout):
+                for torrent in provider.search(query, category=category,
+                                               limit=limit,
+                                               timeout=current_timeout):
                     q.put_nowait(torrent)
             except (ParseError, RequestError, Timeout) as e:
                 message = "Search on provider {} stopped: {}" \
