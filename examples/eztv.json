@@ -2,7 +2,10 @@
     "name": "eztv.yt",
     "fullname": "EZTV",
     "url": "https://eztv.yt",
-    "search": "/search/{query}",
+    "search": {
+        "all": "/search/{query}",
+        "tv": "/search/{query}{hello}"
+    },
     "list": {
         "items": "tr.forum_header_border",
         "item": {
@@ -17,6 +20,8 @@
     },
     "item": {
         "time": "table.episode_columns_holder > tr > td:nth-of-type(3) > table > tr:nth-of-type(2) > td > table > tr:nth-of-type(1) > td @ text | re: (?:.|\\s)*Released: ([a-zA-Z0-9 ]+)(?:.|\\s)* | fmt: \\1",
+        "infohash": "table.episode_columns_holder > tr > td:nth-of-type(3) > table > tr:nth-of-type(2) > td > table > tr:nth-of-type(1) > td @ text | re: (?:.|\\s)*Torrent Hash: ([a-zA-Z0-9 ]+)(?:.|\\s)* | fmt: \\1",
+        "files": "table.episode_columns_holder > tr > td:nth-of-type(3) > table > tr:nth-of-type(2) > td > table > tr:nth-of-type(1) > td @ text | re: (?:.|\\s)*Torrent File: ([^\\s]+)(?:.|\\s)* | fmt: \\1",
         "description": "td.section_thread_post > table:nth-child(2) > tr > td:nth-child(1) > div:nth-child(3) > p @ text"
     }
 }

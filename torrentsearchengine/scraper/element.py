@@ -46,7 +46,7 @@ class Element:
         elements = self.select_elements(selector, limit=limit)
 
         for i in range(len(elements)):
-            attr = selector.attr | "text"
+            attr = selector.attr or "text"
             elements[i] = elements[i].attr(selector.attr)
             if selector.has_re():
                 elements[i] = elements[i].re(selector.re, selector.fmt)

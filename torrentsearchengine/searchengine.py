@@ -125,12 +125,12 @@ class TorrentSearchEngine:
                                                limit=limit,
                                                timeout=current_timeout):
                     q.put_nowait(torrent)
-            except (ParseError, RequestError, Timeout) as e:
-                message = "Search on provider {} stopped: {}" \
-                          .format(provider.name, e)
-                logger.warning(message)
             except queue.Full:
                 pass
+            except Exception as e:
+                message = "Stopped search on provider {}: {}" \
+                          .format(provider.name, e)
+                logger.warning(message)
 
         start_time = time.time()
         torrents = []
@@ -138,7 +138,8 @@ class TorrentSearchEngine:
         with ThreadPoolExecutor(max_workers=n_threads) as executor:
             executor.daemon = True
             n = len(providers)
-            args = [[q]*n, providers, [query]*n, [limit]*n, [timeout]*n]
+            args = [[q]*n, providers, [query]*n, [category]*n,
+                    [limit]*n, [timeout]*n]
             for result in executor.map(task, *args):
                 pass
         while not q.empty():

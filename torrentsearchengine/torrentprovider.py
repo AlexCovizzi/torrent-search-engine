@@ -157,7 +157,7 @@ class TorrentProvider:
             url = urljoin(self.url, url)
         url = urlfix(url)
 
-        logger.debug("{}: GET {}".format(self.name, url))
+        logger.debug("GET {}".format(url))
 
         try:
             response = requests.get(url, **kwargs)
@@ -203,17 +203,17 @@ class TorrentProvider:
         if category is None:
             category = "all"
         if category not in self._search:
-            message = "{}: category {} is not supported." \
-                        .format(self.name, category)
+            message = "category '{}' is not supported." \
+                        .format(category)
             raise NotSupportedError(message)
         else:
             try:
                 path = self._search.get(category)
                 path = path.format(query=query)
             except KeyError as e:
-                message = "{}: {} with query = {} and category = {}" \
-                        .format(self.name, path, query, category)
-                raise FormatError(message)
+                message = "Can't format {} (query='{}', category='{}')" \
+                        .format(path, query, category)
+                raise FormatError(message) from e
         return path
 
     def _get_torrent_data(self, element):
